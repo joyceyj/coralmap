@@ -38,6 +38,7 @@
 </template>
 
 <script lang="ts">
+
 export default{
     name: 'app',
     setup(){
@@ -48,6 +49,7 @@ export default{
             name: 'map',
         });
     },
+
 }
 </script>
 

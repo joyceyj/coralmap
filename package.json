@@ -12,7 +12,8 @@
     "element-plus": "^2.6.1",
     "leaflet-iconmaterial": "^1.1.0",
     "vue": "^3.4.21",
-    "vue-router": "^4.0.13"
+    "vue-router": "^4.0.13",
+    "vue-slider-component": "^4.1.0-beta.7"
   },
   "devDependencies": {
     "@types/node": "^20.11.29",
