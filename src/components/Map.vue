@@ -51,10 +51,10 @@
 
 
   
-<script setup lang="ts">
+<script lang="ts" setup>
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { LMap, LTileLayer } from '@vue-leaflet/vue-leaflet';
+
 
 var publicIcon = L.icon({
     iconUrl: '../src/assets/marker_purple.svg',            // Name of Material icon
@@ -88,11 +88,11 @@ const initMap = () => {
     // http://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
 
-    const marker1 = L.marker([51.5, -0.09], {icon: publicIcon}).addTo(map)
-    const marker3 = L.marker([51.5, -13], {icon: publicIcon}).addTo(map)
-    const marker4 = L.marker([65, -40], {icon: publicIcon}).addTo(map)
-    const marker5 = L.marker([30, -70], {icon: publicIcon}).addTo(map)
-    const marker2 = L.marker([40, 13], {icon: privateIcon}).addTo(map)
+    L.marker([51.5, -0.09], {icon: publicIcon}).addTo(map)
+    L.marker([51.5, -13], {icon: publicIcon}).addTo(map)
+    L.marker([65, -40], {icon: publicIcon}).addTo(map)
+    L.marker([30, -70], {icon: publicIcon}).addTo(map)
+    L.marker([40, 13], {icon: privateIcon}).addTo(map)
 
 }
 onMounted(() => {

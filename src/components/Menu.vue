@@ -57,9 +57,10 @@
     justify-content: space-between;
     /* top: 50%; */
 
-    /* background-image: linear-gradient(to bottom, #001529ee, #001529); */    
+    /* background-image: linear-gradient(to bottom, #001529ee, #001529);     */
     /* background-color:"#545c64"; */
     /* color: gray; */
+    color: gray;
 }
 </style>
   

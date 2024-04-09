@@ -1,91 +1,85 @@
 <template>
     
-    <div class="image-container">
-
-        <div class="upload-container" >
-            <el-upload 
-                v-if="upload"
-                class="upload-demo"
-                action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15" 
-                :show-file-list="false" 
-                drag 
-                :limit=1 
-                :on-change="handlePictureCardPreview" 
-                >
-                <div class="el-upload__text upload-text">
-                    Drop Image Here<br> -or- <br>Click to Upload
-                </div>
-
-            </el-upload>
-        
-            <div v-if="imageUrl" class="upload-demo">
-                <div class="img-btn-group">
-                    <button class="delete-btn" @click="handleRemove">
-                        <svg width="14" height="14" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" stroke="currentColor" style="fill-rule: evenodd; clip-rule: evenodd; stroke-linecap: round; stroke-linejoin: round;"><g transform="matrix(1.14096,-0.140958,-0.140958,1.14096,-0.0559523,0.0559523)"><path d="M18,6L6.087,17.913" style="fill: none; fill-rule: nonzero; stroke-width: 2px;"></path></g><path d="M4.364,4.364L19.636,19.636" style="fill: none; fill-rule: nonzero; stroke-width: 2px;"></path></svg>
-                    </button>
-                </div>
-                <img class="el-upload-list__item-thumbnail upload-image"  :src="imageUrl" alt="" />
-                    
-            </div>
-            
-        </div>
-       
-        <div class="result-container">
-            <el-image class="result-image" v-if="resultImgUrl">
-            
-            </el-image>
-            <div class="result-image" v-else>
-                    <el-icon><Picture /></el-icon>
-            </div>
-        </div>
-        
-
-    </div>
-
-    <div class="image-tool">
-        <div>
-            <button class="run-btn">Run</button>
-        </div>
-        <div class="result-tool">
-            <el-button class="download-btn">Download</el-button>
-            <el-button class="edit-btn">Edit</el-button>
-        </div>
-    </div>
-
-    <div class="model-params">
-        <div class="model-param-head" @click="showModelParams">
-            <span>Model Parameters</span>
-            <el-icon class="model-param-icon"><CaretLeft /></el-icon>
-        </div>
-        
-        <ul class="model-params-table" v-show="isEditParam">
-            <li v-for="item in modelParams" class="model-params-item">
-                <div class="param-item-head">
-                    <span class="param-tile">{{item.title}}</span>
-                    <input class="param-input" v-model=item.value />
-                </div>
-                <!-- <el-slider v-model=item.value :min=item.min :max=item.max show-input size="small"/> -->
-                <vue-slider 
-                    v-model=item.value 
-                    :min=item.min 
-                    :max=item.max 
-                    :interval=item.interval
-                    :process-style="{ backgroundColor: 'pink' }"
-                    :tooltip-style="{ backgroundColor: 'pink', borderColor: 'pink' }"
-                    :contained="true"
-                    @error="inputError"
-                    @change="changeParams"
+    <div class="model-container">
+        <div class="model-setting">
+            <div class="upload-container" >
+                <el-upload 
+                    v-if="upload"
+                    class="upload-demo"
+                    action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15" 
+                    :show-file-list="false" 
+                    drag 
+                    :limit=1 
+                    :on-change="handlePictureCardPreview" 
                     >
-                    <template v-slot:dot="{  focus }">
-                        <div :class="['custom-dot', { focus }]"></div>
-                    </template>
-                </vue-slider>
-            </li>
-        </ul>
+                    <div class="el-upload__text upload-text">
+                        Drop Image Here<br> -or- <br>Click to Upload
+                    </div>
+
+                </el-upload>
+            
+                <div v-if="imageUrl" class="upload-demo">
+                    <div class="img-btn-group">
+                        <button class="delete-btn" @click="handleRemove">
+                            <svg width="14" height="14" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" stroke="currentColor" style="fill-rule: evenodd; clip-rule: evenodd; stroke-linecap: round; stroke-linejoin: round;"><g transform="matrix(1.14096,-0.140958,-0.140958,1.14096,-0.0559523,0.0559523)"><path d="M18,6L6.087,17.913" style="fill: none; fill-rule: nonzero; stroke-width: 2px;"></path></g><path d="M4.364,4.364L19.636,19.636" style="fill: none; fill-rule: nonzero; stroke-width: 2px;"></path></svg>
+                        </button>
+                    </div>
+                    <img class="el-upload-list__item-thumbnail upload-image"  :src="imageUrl" alt="" />
+                </div>   
+            </div>
+
+            <button class="run-btn" @click="runModel">Run</button>
+            <div class="model-params">
+                <div class="model-param-head" @click="showModelParams">
+                    <span>Model Parameters</span>
+                    <el-icon class="model-param-icon"><CaretLeft /></el-icon>
+                </div>
+                
+                <ul class="model-params-table" v-show="isEditParam">
+                    <li v-for="item in modelParams" class="model-params-item">
+                        <div class="param-item-head">
+                            <span class="param-tile">{{item.title}}</span>
+                            <input class="param-input" v-model=item.value />
+                        </div>
+                        <!-- <el-slider v-model=item.value :min=item.min :max=item.max show-input size="small"/> -->
+                        <vue-slider 
+                            v-model=item.value 
+                            :min=item.min 
+                            :max=item.max 
+                            :interval=item.interval
+                            :process-style="{ backgroundColor: '#35a2fd' }"
+                            :tooltip-style="{ backgroundColor: '#35a2fd', borderColor: '#35a2fd' }"
+                            :contained="true"
+                            @error="inputError"
+                            @change="changeParams"
+                            >
+                            <template v-slot:dot="{  focus }">
+                                <div :class="['custom-dot', { focus }]"></div>
+                            </template>
+                        </vue-slider>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+       
+        <div class="result-setting">
+            <div class="result-container">
+                <el-image class="result-image" v-if="resultImgUrl">
+                </el-image>
+                <div class="result-image" v-else>
+                        <el-icon><Picture /></el-icon>
+                </div>
+            </div>
+            
+            <div class="result-tool">
+                <el-button class="download-btn">Download</el-button>
+                <el-button class="edit-btn">Edit</el-button>
+            </div>
+        </div>
         
     </div>
 
-    
 </template>
   
 <script lang="ts" setup>
@@ -133,7 +127,6 @@ var modelParams = ref([
     },
 ])
 const isEditParam = ref(false)
-var errorMsg = ''
 const handlePictureCardPreview = (file: UploadFile) => {
     console.log('preview')
     // console.log(file)
@@ -155,35 +148,49 @@ const showModelParams = () => {
         isEditParam.value = true;
     }
 }
-const inputError = (type, msg) => {
+const inputError = (type:string, msg:string) => {
     console.log(type, msg);
 }
-const changeParams = (value, index) => {
+const changeParams = (value:string, index:number) => {
     console.log(value, index);
     console.log(modelParams);
+}
+const runModel = () => {
+    console.log('running model');
 }
 
 </script>
 
 <style>
-.image-container {
+.model-container {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    gap: 5%;
-    /* height: 75%; */
+    gap: 16px;
+    align-items: stretch;
+    width: 100%;
+}
+
+.model-setting {
+   display: flex;
+   flex-direction: column;
+   flex: 1 1 0%;
+   flex-wrap: wrap;
+   flex-grow: 1;
+   gap: 16px;
+
 }
 .upload-container {
     position: relative;
-    display: flex;
-    justify-content: center;
+    display: block;
+    justify-content: center; 
     align-items: center;
     text-align: center;
-    width: 50vw;
-    border-radius: 8px;
+    min-width: min(160px, 100%);
+    border-radius: 4px;
     box-shadow: var(--el-box-shadow-light);
     background-color: white;
+    overflow: hidden;
     padding: 0;
+    margin: 0;
     .upload-demo {
         width: 100%;
         height: 100%;
@@ -233,45 +240,12 @@ const changeParams = (value, index) => {
     border-color: #E6E7EB;
 }
 
-
-.result-container {
-    padding: 30px 0;
-    text-align: center;
-    display: inline-block;
-    width: 50vw;
-    border: 1px black;
-    border-radius: 8px;
-    box-sizing: border-box;
-    vertical-align: top;
-    background-color: white;
-    /* box-shadow:0 2px 12px 0 rgba(0,0,0,0.1); */
-    box-shadow: var(--el-box-shadow-light);
-    .result-image {
-        text-align: center;
-        position: relative;
-        top: 50%;
-        i {
-            color: #6B7280;
-        }
-    }
-}
-
-
-.image-tool {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    /* height: 10%; */
-    margin-top: 15px;
-    /* gap: 5%; */
-}
-
 .run-btn {
-    width: 40vw;
+    width: 100%;
     align-items: center;
     background-color: #FFFFFF;
     border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: .25rem;
+    border-radius: 4px;
     box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
     box-sizing: border-box;
     color: rgba(0, 0, 0, 0.85);
@@ -318,11 +292,11 @@ const changeParams = (value, index) => {
 
 .model-params {
     display: grid;
-    width: 40vw;
+    width: 100%;
     padding: 0;
     margin-top: 5px;
     background-color: white;
-    border-radius: 8px;
+    border-radius: 4px;
     border: 0.5px solid #E0E1E4;
     box-shadow: rgb(0 0 0 / 5%) 0 0 8px;
 }
@@ -384,13 +358,13 @@ const changeParams = (value, index) => {
         input {
             font-size: 12px;
             padding: 4px;
-            border: none;
+            border: 1px solid rgba(0, 0, 0, 0.1);
             margin: 2px;
-            border-radius: 6px;
-            background-color: #f8f8f8;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 4px;
+            background-color: #FFFFFF;
+            
             max-width: 30px;
+            outline: none;
             color: #333;
         }
         input:hover {
@@ -408,7 +382,7 @@ const changeParams = (value, index) => {
     width: 100%;
     height: 100%;
     border-radius: 0;
-    background-color: pink;
+    background-color: #35a2fd;
     transition: all .3s;
   }
   .custom-dot:hover {
@@ -417,17 +391,63 @@ const changeParams = (value, index) => {
   .custom-dot.focus {
     border-radius: 50%;
   }
+
+.result-setting {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    flex: 1 1 0%;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    gap: 16px;
+
+    /* padding: 30px 0; */
+    /* text-align: center; */
+    /* width: 50vw; */
+    /* vertical-align: top; */
+
+    /* border: 1px black;
+    border-radius: 4px;
+    box-sizing: border-box;
+    background-color: white;
+    /* box-shadow:0 2px 12px 0 rgba(0,0,0,0.1); */
+    /*box-shadow: var(--el-box-shadow-light);
+     */
+} 
+.result-container {
+    position: relative;
+    display: block;
+    justify-content: center; 
+    align-items: center;
+    text-align: center;
+    min-width: min(160px, 100%);
+    border-radius: 4px;
+    box-shadow: var(--el-box-shadow-light);
+    background-color: white;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    height: 65vh;
+    .result-image {
+        text-align: center;
+        position: relative;
+        top: 50%;
+        i {
+            color: #6B7280;
+        }
+    }
+}
 .result-tool {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    width: 40vw;
+    /* width: 40vw; */
 }
 .download-btn {
-    width: 40vw;
+    /* width: 40vw; */
 }
 .edit-btn {
-    width: 40vw;
+    /* width: 40vw; */
 }
 
 </style>
