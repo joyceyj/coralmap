@@ -54,14 +54,16 @@
 <script lang="ts" setup>
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-
-
+// let pur = 'assets/marker_purple.svg';
+// let gre = 'assets/marker_green.svg'
+// var markerPurpleUrl = require('@/'+pur)
+// var markerGreenUrl = require('@/'+gre)
 var publicIcon = L.icon({
-    iconUrl: '../src/assets/marker_purple.svg',            // Name of Material icon
+    iconUrl: './src/assets/marker_purple.svg',            // Name of Material icon
     iconSize: [30, 30]                 // Width and height of the icon
 });
 var privateIcon = L.icon({
-    iconUrl: '../src/assets/marker_green.svg',            // Name of Material icon
+    iconUrl: './src/assets/marker_green.svg',            // Name of Material icon
     iconSize: [30, 30]                 // Width and height of the icon
 });
 

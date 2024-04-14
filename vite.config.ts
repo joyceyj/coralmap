@@ -33,6 +33,15 @@ export default defineConfig( ( {mode} : ConfigEnv): UserConfig => {
                 resolvers: [ElementPlusResolver()],
             })
         ],
+        server: {
+            proxy: {
+                '/api': {
+                    target: 'https://coralscop-test.hkustvgd.com',
+                    changeOrigin: true,
+                    rewrite: (path) => path.replace(/^\/api/, '')
+                }
+            }
+        }
     }
   
 })

@@ -2,31 +2,34 @@
     
     <div class="model-container">
         <div class="model-setting">
-            <div class="upload-container" >
-                <el-upload 
-                    v-if="upload"
-                    class="upload-demo"
-                    action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15" 
-                    :show-file-list="false" 
-                    drag 
-                    :limit=1 
-                    :on-change="handlePictureCardPreview" 
-                    >
-                    <div class="el-upload__text upload-text">
-                        Drop Image Here<br> -or- <br>Click to Upload
-                    </div>
-
-                </el-upload>
-            
-                <div v-if="imageUrl" class="upload-demo">
-                    <div class="img-btn-group">
-                        <button class="delete-btn" @click="handleRemove">
-                            <svg width="14" height="14" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" stroke="currentColor" style="fill-rule: evenodd; clip-rule: evenodd; stroke-linecap: round; stroke-linejoin: round;"><g transform="matrix(1.14096,-0.140958,-0.140958,1.14096,-0.0559523,0.0559523)"><path d="M18,6L6.087,17.913" style="fill: none; fill-rule: nonzero; stroke-width: 2px;"></path></g><path d="M4.364,4.364L19.636,19.636" style="fill: none; fill-rule: nonzero; stroke-width: 2px;"></path></svg>
-                        </button>
-                    </div>
-                    <img class="el-upload-list__item-thumbnail upload-image"  :src="imageUrl" alt="" />
-                </div>   
+            <div class="upload-container" 
+                v-if="upload" 
+                @click="triggerUpload"
+                @dragover="stopDrag" 
+                @dragenter="stopDrag"
+                @drop="handleDrop"
+                data-primary>
+                <input 
+                    ref="imgInput"
+                    accept="image/*"
+                    type="file"
+                    class="hidden"
+                    @change="handleChange" 
+                />
+                <div class="upload-text">
+                    Drop Image Here<br> -or- <br>Click to Upload
+                </div>
             </div>
+        
+            <div v-if="imageUrl" class="upload-container">
+                <div class="img-btn-group">
+                    <button class="delete-btn" @click="handleRemove">
+                        <svg width="14" height="14" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" stroke="currentColor" style="fill-rule: evenodd; clip-rule: evenodd; stroke-linecap: round; stroke-linejoin: round;"><g transform="matrix(1.14096,-0.140958,-0.140958,1.14096,-0.0559523,0.0559523)"><path d="M18,6L6.087,17.913" style="fill: none; fill-rule: nonzero; stroke-width: 2px;"></path></g><path d="M4.364,4.364L19.636,19.636" style="fill: none; fill-rule: nonzero; stroke-width: 2px;"></path></svg>
+                    </button>
+                </div>
+                <el-image class="upload-image"  :src="imageUrl" >
+                </el-image>
+            </div>   
 
             <button class="run-btn" @click="runModel">Run</button>
             <div class="model-params">
@@ -62,36 +65,74 @@
             </div>
         </div>
         
-       
+        
         <div class="result-setting">
             <div class="result-container">
-                <el-image class="result-image" v-if="resultImgUrl">
-                </el-image>
-                <div class="result-image" v-else>
-                        <el-icon><Picture /></el-icon>
+                <div class="checkbox-wrapper-51 img-btn-group" v-if="resultMaskUrl && runState=='success'" >
+                    <input id="cbx-51" type="checkbox" :checked="showMask" :onchange="changeMask">
+                    <label class="toggle" for="cbx-51">
+                        <span>
+                        <svg viewBox="0 0 10 10" height="10px" width="10px">
+                            <path d="M5,1 L5,1 C2.790861,1 1,2.790861 1,5 L1,5 C1,7.209139 2.790861,9 5,9 L5,9 C7.209139,9 9,7.209139 9,5 L9,5 C9,2.790861 7.209139,1 5,1 L5,9 L5,1 Z"></path>
+                        </svg>
+                        </span>
+                    </label>
                 </div>
+                <el-image class="result-origin" :src="resultImgUrl" v-if="resultImgUrl && runState=='success'">
+                </el-image>
+                
+                <el-image class="result-mask" :src="resultMaskUrl" v-if="resultMaskUrl && showMask && runState=='success'">
+                </el-image>
+                <div class="result-image" v-if="!resultImgUrl && runState=='ready'">
+                    <el-icon><Picture /></el-icon>
+                </div>
+                <div class="result-image" v-if="!resultImgUrl && runState=='loading'">
+                    <div class="loader">
+                        <svg viewBox="0 0 80 80">
+                            <circle id="test" cx="40" cy="40" r="32"></circle>
+                        </svg>
+                    </div>
+                </div>
+                <div class="result-image" v-if="!resultImgUrl && runState=='fail'">
+                    <el-tag type="danger">Error</el-tag>
+                </div>
+
             </div>
             
             <div class="result-tool">
-                <el-button class="download-btn">Download</el-button>
-                <el-button class="edit-btn">Edit</el-button>
+                <el-button class="result-btn" :disabled="!resultImgUrl && !resultMaskUrl && runState!='success'" @click="handleDownload">Download</el-button>
+                <el-button class="result-btn" :disabled="true">Edit</el-button>
+                
             </div>
+            
         </div>
-        
     </div>
-
 </template>
   
 <script lang="ts" setup>
 import {  Picture,CaretLeft } from '@element-plus/icons-vue'
 
-import type { UploadFile } from 'element-plus'
+// import type { UploadFile } from 'element-plus'
 import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
+import axios from 'axios'
+import mergeImages from 'merge-images'
 
+const imgInput = ref<HTMLInputElement>()
 const imageUrl = ref('')
 const upload = ref(true)
-const resultImgUrl = ref('')
+var uploadFileName = ref('');
+
+const isEditParam = ref(false);
+const runState = ref('ready');
+
+const resultImgUrl = ref('');
+const resultMaskUrl = ref('');
+const resultImg = ref();
+const resultMask = ref();
+var resultJsonFile = ref({});
+const showMask = ref(true);
+
 var modelParams = ref([
     {
         title: "Point Per Side",
@@ -125,19 +166,33 @@ var modelParams = ref([
         range: [0, 100],
         interval: 10
     },
-])
-const isEditParam = ref(false)
-const handlePictureCardPreview = (file: UploadFile) => {
-    console.log('preview')
+]);
+let timer: null | NodeJS.Timeout = null;
+
+const triggerUpload = () => {
+    // console.log(imgInput);
+    if (imgInput.value) {
+        imgInput.value.click();
+    }
+}
+
+const changeMask = () => {
+    // console.log(showMask);
+    showMask.value = !showMask.value;
+}
+const handlePictureCardPreview = (file:File) => {
+    console.log('===preview===')
     // console.log(file)
-    imageUrl.value = URL.createObjectURL(file.raw!)
+    imageUrl.value = URL.createObjectURL(file)
     upload.value = false;
 }
 
 const handleRemove = () => {
-  console.log('remove')
+  console.log('===remove===')
   imageUrl.value = '';
   upload.value = true;
+  uploadFileName.value = '';
+  
 }
 
 const showModelParams = () => {
@@ -155,8 +210,184 @@ const changeParams = (value:string, index:number) => {
     console.log(value, index);
     console.log(modelParams);
 }
-const runModel = () => {
-    console.log('running model');
+const uploadToSvr = async (formData:FormData) => {
+    try {
+        console.log("===upload===")
+        const result = await axios.post('/api/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        uploadFileName.value = result.data.image_name;
+    } catch (err) {
+        console.error(err);
+    }
+}
+const handleChange = async (event:Event) => {
+    let filelist = (event.target as HTMLInputElement).files;
+    // console.log(file);
+    if (filelist) {
+        let file = filelist[0];
+        let formData = new FormData();
+        formData.append('image_file', file);
+        // console.log(formData.get('image_file'));
+        await uploadToSvr(formData);
+        handlePictureCardPreview(file);
+    }
+}
+
+const handleDrop = async (e: DragEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    let file = e.dataTransfer?.files[0];
+    if (file) {
+        let formData = new FormData();
+        formData.append('image_file', file);
+        await uploadToSvr(formData);
+        handlePictureCardPreview(file);
+    }
+}
+const stopDrag = (e: DragEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+}
+
+const runModel = async () =>  {
+    if (uploadFileName.value != null && uploadFileName.value != '' ) {
+        console.log('===running model===');
+        console.log(uploadFileName.value);
+        runState.value = 'loading';
+        let params = {
+            'image_name':uploadFileName.value
+        };
+        try {
+            const result = await axios.post('/api/enqueue', params, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (result.data.data.image_name) {
+                uploadFileName.value = result.data.data.image_name;
+                clearTimeout(Number(timer));
+                while (Number(timer) < 6000 && runState.value == 'loading') {
+                    await pollingInquiry();
+                }
+                
+            } else {
+                runState.value = 'fail';
+            }
+            // console.log(result);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+}
+const modifyMaskColor = (imgSrc: string) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    const purple = [154, 30, 232];
+    img.src = imgSrc;
+    img.onload = ()  => {
+        canvas.height = img.height;
+        canvas.width = img.width;
+        img.onload = null;
+        if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            const imageData = ctx.getImageData(0,0,img.width,img.height);
+            const data = imageData.data;
+            for (let idx = 0; idx < data.length; idx += 4) {
+                if (data[idx] > 250) {
+                    data[idx] = purple[0];
+                    data[idx+1] = purple[1];
+                    data[idx+2] = purple[2];
+                    data[idx+3] = 255;
+                } else {
+                    data[idx] = 255;
+                    data[idx+1] = 255;
+                    data[idx+2] = 255;
+                    data[idx+3] = 255;
+                }
+            }
+            ctx.putImageData(imageData,0,0);
+            resultMaskUrl.value = canvas.toDataURL();
+        }
+    }
+}
+const getResultInfo = async (imgName:string, maskPath:string, jsonFilePath:string) => {
+    try {
+        console.log("===result===");
+        resultImg.value = await axios.get('/api/usr_imgs/'+imgName, {
+            responseType: 'arraybuffer'
+        });
+        const originBlob = new Blob([resultImg.value.data], {type: resultImg.value.headers['content-type']});
+        resultImgUrl.value = URL.createObjectURL(originBlob);
+        // console.log(originBlob);
+
+        resultMask.value = await axios.get('/api/'+maskPath, {
+            responseType: 'arraybuffer'
+        });
+        const maskBlob = new Blob([resultMask.value.data], {type:resultMask.value.headers['content-type']});
+        let maskUrl = URL.createObjectURL(maskBlob);
+        modifyMaskColor(maskUrl);
+        // console.log(maskBlob);
+
+        resultJsonFile.value = await axios.get('/api/'+jsonFilePath);
+        // console.log(resultImg.value);
+        // console.log(resultMask.value);
+        // console.log(resultJsonFile);
+       
+    } catch (err) {
+        console.error(err);
+    }
+}
+const inquiry = async () => {
+    try {
+        console.log("===inquiry===");
+        const result = await axios.get('/api/result', {
+            params: {
+                'image_name': uploadFileName.value,
+            },
+        });
+        // console.log(result);
+        if (result.data.isDone == 1) {
+            runState.value = 'success';
+            var resImgName = result.data.data.image_name;
+            var resMaskPath = result.data.data.output_paths.mask_image.replace(/\.\//,'');
+            var resJsonPath = result.data.data.output_paths.json.replace(/\.\//,'');
+            getResultInfo(resImgName, resMaskPath, resJsonPath);
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+const pollingInquiry = () => {
+    return new Promise(resolve => {
+        timer = setTimeout(async () => {
+            const result = await inquiry();
+            resolve(result);
+        }, 1500);
+    });
+}
+const generateResultImg = async (imgSrc:string, maskSrc:string) => {
+    mergeImages([imgSrc, {src:maskSrc, opacity: 0.6}]).then(b64 => {
+        downloadResultImg(b64, 'coralscop-result.png');
+    })
+}
+const downloadResultImg = (src:string, filename:string) => {
+    const link = document.createElement('a');
+    link.href = src;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+const handleDownload = async () => {
+    console.log("===Download===");
+    generateResultImg(resultImgUrl.value, resultMaskUrl.value);
 }
 
 </script>
@@ -180,36 +411,37 @@ const runModel = () => {
 }
 .upload-container {
     position: relative;
-    display: block;
+    display: flex;
     justify-content: center; 
+    flex-direction: column;
     align-items: center;
     text-align: center;
     min-width: min(160px, 100%);
+    height: 600px;
     border-radius: 4px;
-    box-shadow: var(--el-box-shadow-light);
+    border: 2px #EBEBEF dashed;
     background-color: white;
     overflow: hidden;
     padding: 0;
     margin: 0;
-    .upload-demo {
-        width: 100%;
-        height: 100%;
-    }
-    .el-upload-dragger {
-        height: 65vh;
-    }
-    .upload-text {
-        text-align: center;
-        position: relative;
-        top: 50%;
-    }
+    cursor: pointer;
+    
+}
+.upload-image {
+    object-fit: contain;
+    margin: 5%;
 }
 
-.upload-image {
-    width: 35vw;
-    height: auto;
-    padding: 5%;
+.upload-text {
+    color: #6B7280;
+    text-align: center;
+    position: relative;
+    /* top: 50%; */
 }
+.hidden {
+    display: none;
+}
+
 .img-btn-group {
     position: absolute;
     display: inline-flex;
@@ -219,6 +451,7 @@ const runModel = () => {
     gap: 1px;
     z-index: 1px;
 }
+
 .delete-btn {
     display: flex;
     justify-content: center;
@@ -243,12 +476,12 @@ const runModel = () => {
 .run-btn {
     width: 100%;
     align-items: center;
-    background-color: #FFFFFF;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
+    background: linear-gradient(to bottom right, #f3f4f6 , #e5e7eb );
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
     box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
     box-sizing: border-box;
-    color: rgba(0, 0, 0, 0.85);
+    color: #374151;
     cursor: pointer;
     display: inline-flex;
     font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -258,23 +491,21 @@ const runModel = () => {
     line-height: 1.25;
     min-height: 3rem;
     padding: calc(.875rem - 1px) calc(1.5rem - 1px);
-    text-decoration: none;
     transition: all 250ms;
-    user-select: none;
-    -webkit-user-select: none;
     touch-action: manipulation;
     vertical-align: baseline;
 }
 
 .run-btn:hover,
 .run-btn:focus {
-    border-color: rgba(0, 0, 0, 0.15);
+    border-color: #e5e7eb;
     box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
     color: rgba(0, 0, 0, 0.65);
 }
 
 .run-btn:hover {
  transform: translateY(-1px);
+ background-color: linear-gradient(to bottom right, #f3f4f6 , #f3f4f6 );
 }
 .run-btn:focus,
 .run-btn:focus-visible {
@@ -400,126 +631,324 @@ const runModel = () => {
     flex-wrap: wrap;
     flex-grow: 1;
     gap: 16px;
-
-    /* padding: 30px 0; */
-    /* text-align: center; */
-    /* width: 50vw; */
-    /* vertical-align: top; */
-
-    /* border: 1px black;
-    border-radius: 4px;
-    box-sizing: border-box;
-    background-color: white;
-    /* box-shadow:0 2px 12px 0 rgba(0,0,0,0.1); */
-    /*box-shadow: var(--el-box-shadow-light);
-     */
 } 
 .result-container {
     position: relative;
-    display: block;
+    display: flex;
     justify-content: center; 
+    flex-direction: column;
     align-items: center;
     text-align: center;
     min-width: min(160px, 100%);
+    height: 600px;
     border-radius: 4px;
-    box-shadow: var(--el-box-shadow-light);
+    /* border: 2px #EBEBEF dashed; */
     background-color: white;
     overflow: hidden;
     padding: 0;
     margin: 0;
-    height: 65vh;
+    cursor: pointer;
+
     .result-image {
         text-align: center;
         position: relative;
-        top: 50%;
+        /* top: 50%; */
         i {
             color: #6B7280;
         }
     }
+    .result-origin {
+        text-align: center;
+        position: absolute;
+        /* top: 5%; */
+        z-index: 10;
+        object-fit: contain;
+        margin: 10%;
+    }
+    .result-mask {
+        text-align: center;
+        position: absolute;
+        /* top: 5%; */
+        opacity: 60%;
+        z-index: 100;
+        mix-blend-mode: multiply;
+        object-fit: contain;
+        margin: 10%;
+    }
+    .el-image {
+        display: flex;
+        overflow: hidden;
+    }
 }
+.checkbox-wrapper-51 input[type="checkbox"] {
+  visibility: hidden;
+  display: none;
+}
+
+.checkbox-wrapper-51 .toggle {
+  position: relative;
+  display: block;
+  width: 42px;
+  height: 24px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transform: translate3d(0, 0, 0);
+}
+
+.checkbox-wrapper-51 .toggle:before {
+  content: "";
+  position: relative;
+  top: 1px;
+  left: 1px;
+  width: 40px;
+  height: 22px;
+  display: block;
+  background: #c8ccd4;
+  border-radius: 12px;
+  transition: background 0.2s ease;
+}
+
+.checkbox-wrapper-51 .toggle span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 24px;
+  height: 24px;
+  display: block;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(154,153,153,0.75);
+  transition: all 0.2s ease;
+}
+
+.checkbox-wrapper-51 .toggle span svg {
+  margin: 7px;
+  fill: none;
+}
+
+.checkbox-wrapper-51 .toggle span svg path {
+  stroke: #c8ccd4;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 24;
+  stroke-dashoffset: 0;
+  transition: all 0.5s linear;
+}
+
+.checkbox-wrapper-51 input[type="checkbox"]:checked + .toggle:before {
+  background: #1175c7;
+}
+
+.checkbox-wrapper-51 input[type="checkbox"]:checked + .toggle span {
+  transform: translateX(18px);
+}
+
+.checkbox-wrapper-51 input[type="checkbox"]:checked + .toggle span path {
+  stroke: #000000;
+  stroke-dasharray: 25;
+  stroke-dashoffset: 25;
+}
+.loader {
+  --path: #2f3545;
+  --dot: #5628ee;
+  --duration: 3s;
+  width: 44px;
+  height: 44px;
+  position: relative;
+}
+
+.loader:before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  position: absolute;
+  display: block;
+  background: var(--dot);
+  top: 37px;
+  left: 19px;
+  transform: translate(-18px, -18px);
+  animation: dotRect var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+
+.loader svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.loader svg rect, .loader svg polygon, .loader svg circle {
+  fill: none;
+  stroke: var(--path);
+  stroke-width: 10px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.loader svg polygon {
+  stroke-dasharray: 145 76 145 76;
+  stroke-dashoffset: 0;
+  animation: pathTriangle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+
+.loader svg rect {
+  stroke-dasharray: 192 64 192 64;
+  stroke-dashoffset: 0;
+  animation: pathRect 3s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+
+.loader svg circle {
+  stroke-dasharray: 150 50 150 50;
+  stroke-dashoffset: 75;
+  animation: pathCircle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+
+.loader.triangle {
+  width: 48px;
+}
+
+.loader.triangle:before {
+  left: 21px;
+  transform: translate(-10px, -18px);
+  animation: dotTriangle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+}
+
+@keyframes pathTriangle {
+  33% {
+    stroke-dashoffset: 74;
+  }
+
+  66% {
+    stroke-dashoffset: 147;
+  }
+
+  100% {
+    stroke-dashoffset: 221;
+  }
+}
+
+@keyframes dotTriangle {
+  33% {
+    transform: translate(0, 0);
+  }
+
+  66% {
+    transform: translate(10px, -18px);
+  }
+
+  100% {
+    transform: translate(-10px, -18px);
+  }
+}
+
+@keyframes pathRect {
+  25% {
+    stroke-dashoffset: 64;
+  }
+
+  50% {
+    stroke-dashoffset: 128;
+  }
+
+  75% {
+    stroke-dashoffset: 192;
+  }
+
+  100% {
+    stroke-dashoffset: 256;
+  }
+}
+
+@keyframes dotRect {
+  25% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(18px, -18px);
+  }
+
+  75% {
+    transform: translate(0, -36px);
+  }
+
+  100% {
+    transform: translate(-18px, -18px);
+  }
+}
+
+@keyframes pathCircle {
+  25% {
+    stroke-dashoffset: 125;
+  }
+
+  50% {
+    stroke-dashoffset: 175;
+  }
+
+  75% {
+    stroke-dashoffset: 225;
+  }
+
+  100% {
+    stroke-dashoffset: 275;
+  }
+}
+
+.loader {
+  display: inline-block;
+  margin: 0 16px;
+}
+
 .result-tool {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     /* width: 40vw; */
 }
-.download-btn {
-    /* width: 40vw; */
+.result-btn {
+    background-color: #FFFFFF;
+    border: 1px solid rgb(209,213,219);
+    border-radius: .5rem;
+    color: #111827;
+    font-family: ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    font-size: .875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    padding: .75rem 1rem;
+    text-align: center;
+    min-height: 3rem;
+    -webkit-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
 }
-.edit-btn {
-    /* width: 40vw; */
+
+.result-btn:hover {
+  background-color: #f9fafb;
+  color: #111827;
+  border: 1px solid rgb(209,213,219);
+}
+
+.result-btn:focus {
+    border-color: rgba(0, 0, 0, 0.15);
+    outline: 0;
+}
+
+.result-btn:focus-visible {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border-color: rgba(0, 0, 0, 0.15);
+  outline: 0;
 }
 
 </style>
 
 
-
-<!-- <div class="upload-container" @click="handleAddImg">
-    <img :src="preview == '' ? default_img : preview" class="upload-image">
-    <input 
-        type="file" 
-        id="scfile" 
-        name="scImage" 
-        autocomplete="off" 
-        class="file-input"
-        @change="attachimage" >
-
-    <div v-show="del" @click="deleteImage">   
-        <el-icon><Delete /></el-icon>
-    </div>
-</div> -->
-<!-- <script lang="ts">
-export default {
-    props: {
-        img_sc_title: {
-            type: String,
-            default: "Choose image",
-        },
-        default_img:{
-            type: String,
-            // <el-icon><Plus /></el-icon>
-        },
-    },
-    data(){
-        return{
-            preview: "",
-            del: false,
-        }
-    },
-    methods:{
-        handleAddImg() {
-            const input = document.querySelector('#scfile') as any
-            input.click()
-        },
-        attachimage(e) {
-            e.preventDefault();
-            var files = e.target.files
-
-            if (!files.length)
-                return;
-            this.createImage(files[0]);
-
-            this.del = true;
-            this.$store.commit('addCreateSingle', files[0])
-            return files;
-        },
-        createImage(file) {
-            var reader = new FileReader();
-            reader.onload = (e) => {
-                this.preview = e.target.result;
-            };
-
-            reader.readAsDataURL(file);
-        },
-        deleteImage(files){
-            var file = Array.from(files);
-            file.splice(0, 1);
-
-            this.del = false;
-            this.preview = "";
-            this.$store.commit('delCreateSingle')
-        }
-    }
-}
-</script> -->
 

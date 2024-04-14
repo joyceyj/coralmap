@@ -19,7 +19,7 @@ declare module 'vue' {
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
     ElRow: typeof import('element-plus/es')['ElRow']
     ElStatistic: typeof import('element-plus/es')['ElStatistic']
-    ElUpload: typeof import('element-plus/es')['ElUpload']
+    ElTag: typeof import('element-plus/es')['ElTag']
     Map: typeof import('./../components/Map.vue')['default']
     Menu: typeof import('./../components/Menu.vue')['default']
     NewImage: typeof import('./../components/NewImage.vue')['default']
