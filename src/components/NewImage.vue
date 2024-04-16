@@ -117,6 +117,9 @@ import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
 import axios from 'axios'
 import mergeImages from 'merge-images'
+axios.defaults.baseURL =
+  process.env.NODE_ENV === "development" ? "" : "https://coralscop-test.hkustvgd.com";
+const base = process.env.NODE_ENV === "development" ? "/api" : "";
 
 const imgInput = ref<HTMLInputElement>()
 const imageUrl = ref('')
@@ -212,8 +215,10 @@ const changeParams = (value:string, index:number) => {
 }
 const uploadToSvr = async (formData:FormData) => {
     try {
-        console.log("===upload===")
-        const result = await axios.post('/api/upload', formData, {
+        console.log("===upload===");
+        // console.log(process.env.NODE_ENV);
+        // console.log(base);
+        const result = await axios.post(base+'/upload', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -234,6 +239,7 @@ const handleChange = async (event:Event) => {
         await uploadToSvr(formData);
         handlePictureCardPreview(file);
     }
+
 }
 
 const handleDrop = async (e: DragEvent) => {
@@ -258,11 +264,30 @@ const runModel = async () =>  {
         console.log('===running model===');
         console.log(uploadFileName.value);
         runState.value = 'loading';
+        var iou, sta, point, minarea;
+        modelParams.value.forEach(element => {
+            if (element.title == 'Point Per Side') {
+                point = element.value;
+            }
+            if (element.title == 'Predicted iou') {
+                iou = element.value;
+            }
+            if (element.title == 'Stability score') {
+                sta = element.value;
+            }
+            if (element.title == 'Min area') {
+                minarea = element.value;
+            }
+        });
         let params = {
-            'image_name':uploadFileName.value
+            'image_name': uploadFileName.value,
+            'iou_threshold': iou,
+            'sta_threshold': sta,
+            'point_number': point,
+            'min_area': minarea
         };
         try {
-            const result = await axios.post('/api/enqueue', params, {
+            const result = await axios.post(base+'/enqueue', params, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -304,10 +329,10 @@ const modifyMaskColor = (imgSrc: string) => {
                     data[idx+2] = purple[2];
                     data[idx+3] = 255;
                 } else {
-                    data[idx] = 255;
-                    data[idx+1] = 255;
-                    data[idx+2] = 255;
-                    data[idx+3] = 255;
+                    data[idx] = 0;
+                    data[idx+1] = 0;
+                    data[idx+2] = 0;
+                    data[idx+3] = 0;
                 }
             }
             ctx.putImageData(imageData,0,0);
@@ -318,14 +343,14 @@ const modifyMaskColor = (imgSrc: string) => {
 const getResultInfo = async (imgName:string, maskPath:string, jsonFilePath:string) => {
     try {
         console.log("===result===");
-        resultImg.value = await axios.get('/api/usr_imgs/'+imgName, {
+        resultImg.value = await axios.get(base+'/usr_imgs/'+imgName, {
             responseType: 'arraybuffer'
         });
         const originBlob = new Blob([resultImg.value.data], {type: resultImg.value.headers['content-type']});
         resultImgUrl.value = URL.createObjectURL(originBlob);
         // console.log(originBlob);
 
-        resultMask.value = await axios.get('/api/'+maskPath, {
+        resultMask.value = await axios.get(base+maskPath, {
             responseType: 'arraybuffer'
         });
         const maskBlob = new Blob([resultMask.value.data], {type:resultMask.value.headers['content-type']});
@@ -333,7 +358,11 @@ const getResultInfo = async (imgName:string, maskPath:string, jsonFilePath:strin
         modifyMaskColor(maskUrl);
         // console.log(maskBlob);
 
-        resultJsonFile.value = await axios.get('/api/'+jsonFilePath);
+        resultJsonFile.value = await axios.get(base+jsonFilePath);
+        // resultJsonFile.value = await axios.get('/'+jsonFilePath, {
+        //     baseURL: 'https://coralscop-test.hkustvgd.com',
+
+        // });
         // console.log(resultImg.value);
         // console.log(resultMask.value);
         // console.log(resultJsonFile);
@@ -345,7 +374,7 @@ const getResultInfo = async (imgName:string, maskPath:string, jsonFilePath:strin
 const inquiry = async () => {
     try {
         console.log("===inquiry===");
-        const result = await axios.get('/api/result', {
+        const result = await axios.get(base+'/result', {
             params: {
                 'image_name': uploadFileName.value,
             },
@@ -372,7 +401,7 @@ const pollingInquiry = () => {
     });
 }
 const generateResultImg = async (imgSrc:string, maskSrc:string) => {
-    mergeImages([imgSrc, {src:maskSrc, opacity: 0.6}]).then(b64 => {
+    mergeImages([imgSrc, {src:maskSrc, opacity: 0.3}]).then(b64 => {
         downloadResultImg(b64, 'coralscop-result.png');
     })
 }

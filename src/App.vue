@@ -6,7 +6,7 @@
                 <!-- header -->
                  <el-header class="header">
                     <div>
-                        <span class="title">Coral Resource</span>
+                        <span class="title">CoralSCOP</span>
                     </div>
                             
                     <RouterLink to="/log-in" class="log-in-button">
