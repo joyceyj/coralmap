@@ -9,7 +9,7 @@
                         <span class="title">CoralSCOP</span>
                     </div>
                             
-                    <RouterLink to="/log-in" class="log-in-button">
+                    <RouterLink to="/login" class="log-in-button">
                         <span>Log in</span>
                     </RouterLink>
 

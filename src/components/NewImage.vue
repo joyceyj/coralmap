@@ -29,29 +29,39 @@
                 </div>
                 <el-image class="upload-image"  :src="imageUrl" >
                 </el-image>
-            </div>   
+            </div>
 
-            <button class="run-btn" @click="runModel">Run</button>
+                <button class="run-btn" @click="runModel">Run</button>
+                <button class="clear-btn" @click="handleClear">Clear</button>
+            
             <div class="model-params">
                 <div class="model-param-head" @click="showModelParams">
                     <span>Model Parameters</span>
-                    <el-icon class="model-param-icon"><CaretLeft /></el-icon>
+                    <el-icon class="model-param-icon" v-show="!isEditParam"><CaretLeft /></el-icon>
+                    <el-icon class="model-param-icon" v-show="isEditParam"><CaretBottom /></el-icon>
                 </div>
                 
                 <ul class="model-params-table" v-show="isEditParam">
                     <li v-for="item in modelParams" class="model-params-item">
                         <div class="param-item-head">
-                            <span class="param-tile">{{item.title}}</span>
+                            <span class="param-title">{{item.title}}
+                                <div class="param-help">
+                                    <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2452" height="14px" width="14px">
+                                        <path d="M512 51.2a460.8 460.8 0 1 0 0 921.6 460.8 460.8 0 0 0 0-921.6z m0 855.7568a394.9568 394.9568 0 1 1 0-789.9136 394.9568 394.9568 0 0 1 0 789.9136zM512 281.6a120.4736 120.4736 0 0 0-131.6352 125.0816h59.904A65.8432 65.8432 0 0 1 512 336.896c35.5328 0 65.8432 17.7664 65.8432 59.2384 0 30.9248-18.432 45.4144-48.0768 65.8432a116.5312 116.5312 0 0 0-58.5728 98.0992v23.04h59.904v-17.8176c0-35.5328 13.1584-46.08 49.3568-73.728a119.1424 119.1424 0 0 0 63.1808-99.3792A115.2 115.2 0 0 0 512 281.6z m-50.0224 399.872a46.08 46.08 0 0 0 92.16-1.5872 45.4144 45.4144 0 0 0-48.7424-46.08 46.08 46.08 0 0 0-43.4176 47.7184z" p-id="2453" fill="#13227a">
+                                        </path>
+                                    </svg>
+                                    <div class="tooltip">{{ item.tooltip }}</div>
+                                </div>
+                            </span>
                             <input class="param-input" v-model=item.value />
                         </div>
-                        <!-- <el-slider v-model=item.value :min=item.min :max=item.max show-input size="small"/> -->
                         <vue-slider 
                             v-model=item.value 
                             :min=item.min 
                             :max=item.max 
                             :interval=item.interval
-                            :process-style="{ backgroundColor: '#35a2fd' }"
-                            :tooltip-style="{ backgroundColor: '#35a2fd', borderColor: '#35a2fd' }"
+                            :process-style="{ backgroundColor: '#1175c7' }"
+                            :tooltip-style="{ backgroundColor: '#1175c7', borderColor: '#1175c7' }"
                             :contained="true"
                             @error="inputError"
                             @change="changeParams"
@@ -68,21 +78,48 @@
         
         <div class="result-setting">
             <div class="result-container">
-                <div class="checkbox-wrapper-51 img-btn-group" v-if="resultMaskUrl && runState=='success'" >
-                    <input id="cbx-51" type="checkbox" :checked="showMask" :onchange="changeMask">
-                    <label class="toggle" for="cbx-51">
-                        <span>
-                        <svg viewBox="0 0 10 10" height="10px" width="10px">
-                            <path d="M5,1 L5,1 C2.790861,1 1,2.790861 1,5 L1,5 C1,7.209139 2.790861,9 5,9 L5,9 C7.209139,9 9,7.209139 9,5 L9,5 C9,2.790861 7.209139,1 5,1 L5,9 L5,1 Z"></path>
-                        </svg>
-                        </span>
-                    </label>
+                <div class="img-btn-group" v-if="runState=='success'" >
+                <!-- <div class="img-btn-group" v-if="true" > -->
+                    <div>
+                        <vue-slider 
+                            v-model=maskOpacity
+                            class="mask-opacity-silder"
+                            :min=0.0 
+                            :max=1.0
+                            :interval=0.05
+                            :process-style="{ backgroundColor: '#1175c7' }"
+                            :tooltip-style="{ backgroundColor: '#1175c7', borderColor: '#1175c7' }"
+                            :tooltip-placement="['bottom']"
+                            :contained="true"
+                            @change="changeMaskOpacity"
+                            >
+                            <template v-slot:dot="{  focus }">
+                                <div :class="['custom-dot', { focus }]"></div>
+                            </template>
+                        </vue-slider>
+                    </div>
+                     
+                    <div class="checkbox-wrapper">
+                        <input id="cbx-51" type="checkbox" :checked="showMask" :onchange="changeMask">
+                        <label class="toggle" for="cbx-51">
+                            <span>
+                            <svg viewBox="0 0 10 10" height="10px" width="10px">
+                                <path d="M5,1 L5,1 C2.790861,1 1,2.790861 1,5 L1,5 C1,7.209139 2.790861,9 5,9 L5,9 C7.209139,9 9,7.209139 9,5 L9,5 C9,2.790861 7.209139,1 5,1 L5,9 L5,1 Z"></path>
+                            </svg>
+                            </span>
+                        </label>
+                    </div>
+                   
                 </div>
+
                 <el-image class="result-origin" :src="resultImgUrl" v-if="resultImgUrl && runState=='success'">
                 </el-image>
                 
-                <el-image class="result-mask" :src="resultMaskUrl" v-if="resultMaskUrl && showMask && runState=='success'">
-                </el-image>
+                <div class="[loaded ? 'gradient-wrapper' : '']">
+                    <el-image class="result-mask" id="maskSlider" :src="resultMaskUrl" v-if="resultMaskUrl && showMask && runState=='success'">
+                    </el-image>
+                </div>
+                
                 <div class="result-image" v-if="!resultImgUrl && runState=='ready'">
                     <el-icon><Picture /></el-icon>
                 </div>
@@ -91,6 +128,7 @@
                         <svg viewBox="0 0 80 80">
                             <circle id="test" cx="40" cy="40" r="32"></circle>
                         </svg>
+                        <span>{{ runTimeMilSec }}s</span>
                     </div>
                 </div>
                 <div class="result-image" v-if="!resultImgUrl && runState=='fail'">
@@ -100,7 +138,18 @@
             </div>
             
             <div class="result-tool">
-                <el-button class="result-btn" :disabled="!resultImgUrl && !resultMaskUrl && runState!='success'" @click="handleDownload">Download</el-button>
+                <div class="download-btn">
+                    <el-button class="result-btn" :disabled="!resultImgUrl || !resultMaskUrl || runState!='success'">Download &nbsp; ▼</el-button>
+                    <!-- <el-button class="result-btn" :disabled="false">Download &nbsp; ▼</el-button> -->
+                    <div class="download-content" v-if="resultImgUrl && resultMaskUrl && runState=='success'">
+                    <!-- <div class="download-content" v-if="true"> -->
+                        <div class="download-item" @click="downloadResult">ResultImage</div>
+                        <div class="download-item" @click="downloadMask">MaskImage</div>
+                        <div class="download-item" @click="downloadJson">JsonFile</div>
+                        <div class="download-item" @click="downloadAll">All</div>
+                    </div>
+                </div>
+                
                 <el-button class="result-btn" :disabled="true">Edit</el-button>
                 
             </div>
@@ -110,31 +159,44 @@
 </template>
   
 <script lang="ts" setup>
-import {  Picture,CaretLeft } from '@element-plus/icons-vue'
-
-// import type { UploadFile } from 'element-plus'
+import {  Picture,CaretLeft,CaretBottom} from '@element-plus/icons-vue'
 import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
 import axios from 'axios'
-import mergeImages from 'merge-images'
+import JSZip from "jszip"
+
+
+
+
+// axios api setting
 axios.defaults.baseURL =
   process.env.NODE_ENV === "development" ? "" : "https://coralscop-test.hkustvgd.com";
 const base = process.env.NODE_ENV === "development" ? "/api" : "";
 
+// upload file
 const imgInput = ref<HTMLInputElement>()
 const imageUrl = ref('')
 const upload = ref(true)
-var uploadFileName = ref('');
+// var uploadFileName = ref('');
+var uploadFileName = ref('8c78a50c-0cd1-4982-90da-d4d2a6800f27.jpg');
 
 const isEditParam = ref(false);
 const runState = ref('ready');
 
 const resultImgUrl = ref('');
+// modify to purple image
 const resultMaskUrl = ref('');
+// black and white image
+var maskUrl = '';
+const resultJsonUrl = ref('');
+
 const resultImg = ref();
 const resultMask = ref();
-var resultJsonFile = ref({});
+var resultJsonFile = ref();
+
 const showMask = ref(true);
+var maskOpacity = ref(0.3);
+
 
 var modelParams = ref([
     {
@@ -143,7 +205,8 @@ var modelParams = ref([
         min: 4,
         max: 64,
         range: [4, 8, 16, 32, 64],
-        interval: 1
+        interval: 1,
+        tooltip: "It controls the granularity of the generated masks. Larger values yield longer response times."
     },
     {
         title: "Predicted iou",
@@ -151,7 +214,8 @@ var modelParams = ref([
         min: 0.00,
         max: 1.00,
         range: [0,1],
-        interval: 0.01
+        interval: 0.01,
+        tooltip: "It indicates the quality of the generated coral masks. The coral masks with predicted iou below this value will be filtered out.Higher is better."
     },
     {
         title: "Stability score",
@@ -159,7 +223,8 @@ var modelParams = ref([
         min: 0.42,
         max: 0.82,
         range: [0.42, 0.82],
-        interval: 0.01
+        interval: 0.01,
+        tooltip: "The stability of the generated coral masks"
     },
     {
         title: "Min area",
@@ -167,10 +232,24 @@ var modelParams = ref([
         max: 100,
         value: 100,
         range: [0, 100],
-        interval: 10
+        interval: 10,
+        tooltip: "Coral masks with areas lower than this value will be removed."
     },
 ]);
 let timer: null | NodeJS.Timeout = null;
+// millisecond
+var runTime;
+var runTimeMilSec = 0;
+const startRunTime = () => {
+    runTime = setInterval(() => {
+        runTimeMilSec = runTimeMilSec + 50;
+    }, 50);
+}
+const stopRunTime = () => {
+    runTime = clearInterval(runTime);
+}
+
+
 
 const triggerUpload = () => {
     // console.log(imgInput);
@@ -183,6 +262,13 @@ const changeMask = () => {
     // console.log(showMask);
     showMask.value = !showMask.value;
 }
+const changeMaskOpacity = () => {
+    // console.log(maskOpacity.value);
+    var maskdiv = document.getElementById('maskSlider');
+    if (maskdiv) {
+        maskdiv.style.opacity = maskOpacity.value.toString();
+    }
+}
 const handlePictureCardPreview = (file:File) => {
     console.log('===preview===')
     // console.log(file)
@@ -190,18 +276,17 @@ const handlePictureCardPreview = (file:File) => {
     upload.value = false;
 }
 
+// remove the upload info
 const handleRemove = () => {
-  console.log('===remove===')
-  imageUrl.value = '';
-  upload.value = true;
-  uploadFileName.value = '';
-  
+    console.log('===remove===')
+    imageUrl.value = '';
+    upload.value = true;
+    uploadFileName.value = '';
 }
 
 const showModelParams = () => {
     if (isEditParam.value == true) {
         isEditParam.value = false;
-        
     } else {
         isEditParam.value = true;
     }
@@ -264,6 +349,7 @@ const runModel = async () =>  {
         console.log('===running model===');
         console.log(uploadFileName.value);
         runState.value = 'loading';
+        resultImgUrl.value = '';
         var iou, sta, point, minarea;
         modelParams.value.forEach(element => {
             if (element.title == 'Point Per Side') {
@@ -294,9 +380,16 @@ const runModel = async () =>  {
             });
             if (result.data.data.image_name) {
                 uploadFileName.value = result.data.data.image_name;
+                startRunTime();
                 clearTimeout(Number(timer));
-                while (Number(timer) < 6000 && runState.value == 'loading') {
+                while (Number(timer) < 800 && runState.value == 'loading') {
+                    // console.log(Number(runTimeMilSec));
                     await pollingInquiry();
+                }
+                stopRunTime();
+                if (Number(timer) >= 800 && runState.value == 'loading') {
+                    clearTimeout(Number(timer));
+                    runState.value = 'fail';
                 }
                 
             } else {
@@ -354,23 +447,18 @@ const getResultInfo = async (imgName:string, maskPath:string, jsonFilePath:strin
             responseType: 'arraybuffer'
         });
         const maskBlob = new Blob([resultMask.value.data], {type:resultMask.value.headers['content-type']});
-        let maskUrl = URL.createObjectURL(maskBlob);
+        maskUrl = URL.createObjectURL(maskBlob);
         modifyMaskColor(maskUrl);
         // console.log(maskBlob);
 
-        resultJsonFile.value = await axios.get(base+jsonFilePath);
-        // resultJsonFile.value = await axios.get('/'+jsonFilePath, {
-        //     baseURL: 'https://coralscop-test.hkustvgd.com',
-
-        // });
-        // console.log(resultImg.value);
-        // console.log(resultMask.value);
-        // console.log(resultJsonFile);
-       
+        var json = await axios.get(base+jsonFilePath);
+        resultJsonFile.value = JSON.stringify(json);
+        resultJsonUrl.value = 'data:application/json;charset=utf-8,'+encodeURIComponent(resultJsonFile.value);       
     } catch (err) {
         console.error(err);
     }
 }
+
 const inquiry = async () => {
     try {
         console.log("===inquiry===");
@@ -397,15 +485,56 @@ const pollingInquiry = () => {
         timer = setTimeout(async () => {
             const result = await inquiry();
             resolve(result);
-        }, 1500);
+        }, 500);
     });
 }
-const generateResultImg = async (imgSrc:string, maskSrc:string) => {
-    mergeImages([imgSrc, {src:maskSrc, opacity: 0.3}]).then(b64 => {
-        downloadResultImg(b64, 'coralscop-result.png');
-    })
+const generateResultImg = async (imgSrc:string, maskSrc:string, maskOpa:number, blendMode:GlobalCompositeOperation) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    img.src = imgSrc;
+    const mask = new Image();
+    mask.src = maskSrc;
+
+    await img.onload;
+    await mask.onload;
+    canvas.height = img.height;
+    canvas.width = img.width;
+    if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        ctx.globalAlpha = maskOpa;
+        ctx.globalCompositeOperation = blendMode;
+        ctx.drawImage(mask, 0, 0);
+    }
+    return canvas.toDataURL();
+
 }
-const downloadResultImg = (src:string, filename:string) => {
+
+const handleClear = () => {
+    // imgInput.value = ;
+    imageUrl.value = '';
+    upload.value = true;
+    // uploadFileName.value = '';
+    uploadFileName.value = '8c78a50c-0cd1-4982-90da-d4d2a6800f27.jpg';
+
+    isEditParam.value = false;
+    runState.value = 'ready';
+
+    resultImgUrl.value = '';
+    resultMaskUrl.value = '';
+    // black and white image
+    maskUrl = '';
+    resultJsonUrl.value = '';
+
+    resultImg.value = '';
+    resultMask.value = '';
+    resultJsonFile.value = '';
+
+    showMask.value = true;
+    maskOpacity.value = 0.3;
+}
+
+const downloadFile = (src:string, filename:string) => {
     const link = document.createElement('a');
     link.href = src;
     link.download = filename;
@@ -414,10 +543,61 @@ const downloadResultImg = (src:string, filename:string) => {
     document.body.removeChild(link);
 }
 
-const handleDownload = async () => {
-    console.log("===Download===");
-    generateResultImg(resultImgUrl.value, resultMaskUrl.value);
+// const handleDownload = async () => {
+//     console.log("===Download===");
+//     generateResultImg(resultImgUrl.value, resultMaskUrl.value);
+// }
+
+// import timgUrl from '@/assets/img.jpg'
+// import tmaskUrl from '@/assets/mask2.png'
+// resultImgUrl.value = timgUrl;
+// resultMaskUrl.value = tmaskUrl;
+const downloadResult = async() => {
+    console.log("===Download Result Image===");
+    // generateResultImg(resultImgUrl.value, resultMaskUrl.value);
+    // mergeImages([imgUrl, {maskUrl, opacity: 0.3}]).then(b64 => {
+    //     downloadFile(b64, 'coralscop-result.png');
+    // });
+    var mergeUrl = await generateResultImg(resultImgUrl.value, resultMaskUrl.value, maskOpacity.value, 'multiply');
+    downloadFile(mergeUrl, 'coralscop-result.png');
+    
 }
+const downloadMask = async() => {
+    console.log("===Download Mask Image===");
+    downloadFile(maskUrl, 'coralscop-mask.png');
+}
+const downloadJson = async() => {
+    console.log("===Download Json File===");
+    downloadFile(resultJsonUrl.value, 'coralscop-json.json');
+}
+const downloadAll = async() => {
+    console.log("===Download All===");
+    const zip = new JSZip();
+    // console.log(resultMask.value);
+    
+    // mergeImages([resultImgUrl.value, {src:resultMaskUrl.value, opacity: 0.3}]).then(b64 => {
+    //     const arr = b64.split(",");
+    //     // console.log(arr);
+    //     zip.file('coralscop-result.png', arr[1], {base64:true});
+    //     zip.file('coralscop-mask.png', resultMask.value.data, {binary:true});
+    //     zip.file('coralscop-json.json', resultJsonUrl.value, {binary:true});
+    //     // console.log(zip);
+    //     zip.generateAsync({ type: 'blob' }).then(content => {
+    //         // console.log(content);
+    //         downloadFile(URL.createObjectURL(content), 'coralscop-result.zip');
+    //     });
+    // });
+    var mergeUrl = await generateResultImg(resultImgUrl.value, resultMaskUrl.value, maskOpacity.value, 'multiply');
+    zip.file('coralscop-result.png', mergeUrl.split(';base64,')[1], {binary:true});
+    zip.file('coralscop-mask.png', resultMask.value.data, {binary:true});
+    zip.file('coralscop-json.json', resultJsonUrl.value, {binary:true});
+    zip.generateAsync({ type: 'blob' }).then(content => {
+        // console.log(content);
+        downloadFile(URL.createObjectURL(content), 'coralscop-result.zip');
+    });
+    
+}
+
 
 </script>
 
@@ -438,6 +618,7 @@ const handleDownload = async () => {
    gap: 16px;
 
 }
+
 .upload-container {
     position: relative;
     display: flex;
@@ -454,7 +635,6 @@ const handleDownload = async () => {
     padding: 0;
     margin: 0;
     cursor: pointer;
-    
 }
 .upload-image {
     object-fit: contain;
@@ -474,13 +654,16 @@ const handleDownload = async () => {
 .img-btn-group {
     position: absolute;
     display: inline-flex;
-    top: 1%;
-    right: 1%;
+    top: 2%;
+    right: 2%;
     justify-content: flex-end;
-    gap: 1px;
+    gap: 3px;
     z-index: 1px;
 }
-
+.mask-opacity-silder {
+    min-width: 150px;
+    margin-top: 5px;
+}
 .delete-btn {
     display: flex;
     justify-content: center;
@@ -604,18 +787,55 @@ const handleDownload = async () => {
     padding-bottom: 4px;
     gap: 2px;
     justify-items: start;
-    .param-tile {
-        color: #374151;
-        font-size: 14px;
-        display: block;
-        padding: 0;
-        margin: 0;
-        text-align: left;
-    }
+    
     .param-item-head {
         display: flex;
         justify-content: space-between;
-        input {
+        align-items: center;
+        gap: 5px;
+        .param-title {
+            color: #374151;
+            font-size: 14px;
+            display: inline-flex;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+            align-items: center;
+            gap: 3px;
+            .param-help {
+                margin: 0;
+                margin-top: 5px;
+                text-align: center;
+                align-items: center;
+                position: relative;
+            }
+            .tooltip {
+                position: absolute;
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-10%);
+                color: #fff;
+                padding: 6px 10px;
+                border-radius: 15px;
+                opacity: 0;
+                visibility: hidden;
+                font-size: 12px;
+                transition: all 0.3s ease;
+                width: 25vw;
+                z-index: 10;
+            }
+
+            .param-help:hover .tooltip {
+                opacity: 1;
+                visibility: visible;
+                bottom: 20px;
+                /* background-color: #7020FF; */
+                background-image: linear-gradient(to right, #d628fe, #35a2fd);
+                height: fit-content;
+            }
+        }
+        .param-input {
+            grid-column: 4/4;
             font-size: 12px;
             padding: 4px;
             border: 1px solid rgba(0, 0, 0, 0.1);
@@ -627,22 +847,21 @@ const handleDownload = async () => {
             outline: none;
             color: #333;
         }
-        input:hover {
+        .param-input:hover {
             background-color: #f2f2f2;
         }
-        input:focus {
+        .param-input:focus {
             outline: none;
             background-color: #fff;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
-    }
+    }   
 }
 .custom-dot {
     width: 100%;
     height: 100%;
     border-radius: 0;
-    background-color: #35a2fd;
+    background-color: #1175c7;
     transition: all .3s;
   }
   .custom-dot:hover {
@@ -681,6 +900,8 @@ const handleDownload = async () => {
     .result-image {
         text-align: center;
         position: relative;
+        /* width: 50vw;
+        height: 50vh; */
         /* top: 50%; */
         i {
             color: #6B7280;
@@ -696,7 +917,7 @@ const handleDownload = async () => {
     }
     .result-mask {
         text-align: center;
-        position: absolute;
+        /* position: absolute; */
         /* top: 5%; */
         opacity: 60%;
         z-index: 100;
@@ -709,12 +930,37 @@ const handleDownload = async () => {
         overflow: hidden;
     }
 }
-.checkbox-wrapper-51 input[type="checkbox"] {
+@keyframes wrapper-gradient {
+0% {
+transform: translateX(-100%);
+}
+100% {
+transform: translateX(0);
+}
+}
+@keyframes img-gradient {
+0% {
+transform: translateX(100%);
+}
+100% {
+transform: translateX(0);
+}
+}
+.gradient-wrapper {
+/* display: inline-block;
+overflow: hidden; */
+animation: wrapper-gradient 10s linear;
+}
+.gradient-wrapper>img {
+animation: img-gradient 10s linear;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
   visibility: hidden;
   display: none;
 }
 
-.checkbox-wrapper-51 .toggle {
+.checkbox-wrapper .toggle {
   position: relative;
   display: block;
   width: 42px;
@@ -724,7 +970,7 @@ const handleDownload = async () => {
   transform: translate3d(0, 0, 0);
 }
 
-.checkbox-wrapper-51 .toggle:before {
+.checkbox-wrapper .toggle:before {
   content: "";
   position: relative;
   top: 1px;
@@ -737,7 +983,7 @@ const handleDownload = async () => {
   transition: background 0.2s ease;
 }
 
-.checkbox-wrapper-51 .toggle span {
+.checkbox-wrapper .toggle span {
   position: absolute;
   top: 0;
   left: 0;
@@ -750,12 +996,12 @@ const handleDownload = async () => {
   transition: all 0.2s ease;
 }
 
-.checkbox-wrapper-51 .toggle span svg {
+.checkbox-wrapper .toggle span svg {
   margin: 7px;
   fill: none;
 }
 
-.checkbox-wrapper-51 .toggle span svg path {
+.checkbox-wrapper .toggle span svg path {
   stroke: #c8ccd4;
   stroke-width: 2;
   stroke-linecap: round;
@@ -765,15 +1011,15 @@ const handleDownload = async () => {
   transition: all 0.5s linear;
 }
 
-.checkbox-wrapper-51 input[type="checkbox"]:checked + .toggle:before {
+.checkbox-wrapper input[type="checkbox"]:checked + .toggle:before {
   background: #1175c7;
 }
 
-.checkbox-wrapper-51 input[type="checkbox"]:checked + .toggle span {
+.checkbox-wrapper input[type="checkbox"]:checked + .toggle span {
   transform: translateX(18px);
 }
 
-.checkbox-wrapper-51 input[type="checkbox"]:checked + .toggle span path {
+.checkbox-wrapper input[type="checkbox"]:checked + .toggle span path {
   stroke: #000000;
   stroke-dasharray: 25;
   stroke-dashoffset: 25;
@@ -939,15 +1185,15 @@ const handleDownload = async () => {
 .result-btn {
     background-color: #FFFFFF;
     border: 1px solid rgb(209,213,219);
-    border-radius: .5rem;
+    /* border: 1px solid #5628ee; */
+    border-radius: 8px;
     color: #111827;
-    font-family: ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
     font-size: .875rem;
     font-weight: 600;
     line-height: 1.25rem;
-    padding: .75rem 1rem;
+    padding: 8px 16px;
     text-align: center;
-    min-height: 3rem;
+    min-height: 48px;
     -webkit-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     cursor: pointer;
@@ -960,9 +1206,8 @@ const handleDownload = async () => {
 }
 
 .result-btn:hover {
-  background-color: #f9fafb;
-  color: #111827;
-  border: 1px solid rgb(209,213,219);
+    background-color: #FFFFFF;
+    color: #111827;
 }
 
 .result-btn:focus {
@@ -977,6 +1222,55 @@ const handleDownload = async () => {
   outline: 0;
 }
 
+.download-content {
+  display: none;
+  font-size: 13px;
+  position: absolute;
+  z-index: 1;
+  min-width: 145px;
+  background-color: #FFFFFF;
+  border: 1px solid #5628ee;
+  /* border: 1px solid rgb(209,213,219); */
+  border-radius: 0px 8px 8px 8px;
+  box-shadow: 0px 8px 8px 0px rgba(0,0,0,0.2);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.download-item {
+  /* color: #5628ee; */
+  color: #111827;
+  padding: 8px 20px;
+  text-decoration: none;
+  display: block;
+  transition: 0.1s;
+  text-align: left;
+  /* padding-left: 5px; */
+}
+
+.download-item:hover {
+    /* background-color: #35a2fd; */
+    background-image: linear-gradient(to right, #5628ee, #35a2fd);
+    color: #FFFFFF;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.download-item:focus {
+  background-color: #212121;
+  color: #5628ee;
+}
+.download-btn {
+    position: relative;
+    display: block;
+}
+.download-btn:hover .download-content {
+  display: block;
+}
+.download-btn:hover .result-btn{
+    border-radius: 8px 8px 0px 0px;
+    border-bottom: 0;
+    border: 1px solid #5628ee;
+}
 </style>
 
 

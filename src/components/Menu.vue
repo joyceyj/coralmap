@@ -3,7 +3,7 @@
         <el-col >
             <!-- <h5 class="mb-2">Custom colors</h5> -->
             <el-menu
-            active-text-color="#7020FF"
+            active-text-color="#5628ee"
             class="el-menu-vertical-demo"
             default-active="1"
             
