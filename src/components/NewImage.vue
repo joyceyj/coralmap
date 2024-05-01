@@ -21,7 +21,7 @@
                 </div>
             </div>
         
-            <div v-if="imageUrl" class="upload-container">
+            <div class="upload-container" v-if="imageUrl" >
                 <div class="img-btn-group">
                     <button class="delete-btn" @click="handleRemove">
                         <svg width="14" height="14" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" stroke="currentColor" style="fill-rule: evenodd; clip-rule: evenodd; stroke-linecap: round; stroke-linejoin: round;"><g transform="matrix(1.14096,-0.140958,-0.140958,1.14096,-0.0559523,0.0559523)"><path d="M18,6L6.087,17.913" style="fill: none; fill-rule: nonzero; stroke-width: 2px;"></path></g><path d="M4.364,4.364L19.636,19.636" style="fill: none; fill-rule: nonzero; stroke-width: 2px;"></path></svg>
@@ -31,8 +31,8 @@
                 </el-image>
             </div>
 
-                <button class="run-btn" @click="runModel">Run</button>
-                <button class="clear-btn" @click="handleClear">Clear</button>
+            <button class="run-btn" @click="runModel">Run</button>
+            <button class="normal-btn" @click="handleClear">Clear</button>
             
             <div class="model-params">
                 <div class="model-param-head" @click="showModelParams">
@@ -60,8 +60,8 @@
                             :min=item.min 
                             :max=item.max 
                             :interval=item.interval
-                            :process-style="{ backgroundColor: '#1175c7' }"
-                            :tooltip-style="{ backgroundColor: '#1175c7', borderColor: '#1175c7' }"
+                            :process-style="{ backgroundColor: 'blueviolet' }"
+                            :tooltip-style="{ backgroundColor: 'blueviolet', borderColor: 'blueviolet' }"
                             :contained="true"
                             @error="inputError"
                             @change="changeParams"
@@ -87,8 +87,8 @@
                             :min=0.0 
                             :max=1.0
                             :interval=0.05
-                            :process-style="{ backgroundColor: '#1175c7' }"
-                            :tooltip-style="{ backgroundColor: '#1175c7', borderColor: '#1175c7' }"
+                            :process-style="{ backgroundColor: 'blueviolet' }"
+                            :tooltip-style="{ backgroundColor: 'blueviolet', borderColor: 'blueviolet' }"
                             :tooltip-placement="['bottom']"
                             :contained="true"
                             @change="changeMaskOpacity"
@@ -115,10 +115,8 @@
                 <el-image class="result-origin" :src="resultImgUrl" v-if="resultImgUrl && runState=='success'">
                 </el-image>
                 
-                <div class="[loaded ? 'gradient-wrapper' : '']">
-                    <el-image class="result-mask" id="maskSlider" :src="resultMaskUrl" v-if="resultMaskUrl && showMask && runState=='success'">
-                    </el-image>
-                </div>
+                <el-image class="result-mask" :style="[variableOpacity]" :src="resultMaskUrl" v-if="resultMaskUrl && showMask && runState=='success'">
+                </el-image>
                 
                 <div class="result-image" v-if="!resultImgUrl && runState=='ready'">
                     <el-icon><Picture /></el-icon>
@@ -128,19 +126,20 @@
                         <svg viewBox="0 0 80 80">
                             <circle id="test" cx="40" cy="40" r="32"></circle>
                         </svg>
-                        <span>{{ runTimeMilSec }}s</span>
+                        <span>{{ runTimeMilSec / 1000.0 }}s</span>
                     </div>
                 </div>
                 <div class="result-image" v-if="!resultImgUrl && runState=='fail'">
                     <el-tag type="danger">Error</el-tag>
+                    <span>{{ errorMsg }}</span>
                 </div>
 
             </div>
             
             <div class="result-tool">
                 <div class="download-btn">
-                    <el-button class="result-btn" :disabled="!resultImgUrl || !resultMaskUrl || runState!='success'">Download &nbsp; ▼</el-button>
-                    <!-- <el-button class="result-btn" :disabled="false">Download &nbsp; ▼</el-button> -->
+                    <el-button :class="[runState=='success' ? 'result-btn  normal-btn' : 'normal-btn']" :disabled="!resultImgUrl || !resultMaskUrl || runState!='success'">Download&nbsp; ▼</el-button>
+                    <!-- <el-button :class="[runState=='success' ? 'result-btn  normal-btn' : 'normal-btn']" :disabled="false">Download &nbsp; ▼</el-button> -->
                     <div class="download-content" v-if="resultImgUrl && resultMaskUrl && runState=='success'">
                     <!-- <div class="download-content" v-if="true"> -->
                         <div class="download-item" @click="downloadResult">ResultImage</div>
@@ -150,7 +149,7 @@
                     </div>
                 </div>
                 
-                <el-button class="result-btn" :disabled="true">Edit</el-button>
+                <el-button class="result-btn normal-btn" :disabled="true">Edit</el-button>
                 
             </div>
             
@@ -165,9 +164,6 @@ import 'vue-slider-component/theme/default.css'
 import axios from 'axios'
 import JSZip from "jszip"
 
-
-
-
 // axios api setting
 axios.defaults.baseURL =
   process.env.NODE_ENV === "development" ? "" : "https://coralscop-test.hkustvgd.com";
@@ -177,11 +173,13 @@ const base = process.env.NODE_ENV === "development" ? "/api" : "";
 const imgInput = ref<HTMLInputElement>()
 const imageUrl = ref('')
 const upload = ref(true)
-// var uploadFileName = ref('');
-var uploadFileName = ref('8c78a50c-0cd1-4982-90da-d4d2a6800f27.jpg');
+var uploadFileName = ref('');
+// var uploadFileName = ref('8c78a50c-0cd1-4982-90da-d4d2a6800f27.jpg');
 
 const isEditParam = ref(false);
 const runState = ref('ready');
+const errorMsg = ref('');
+
 
 const resultImgUrl = ref('');
 // modify to purple image
@@ -195,8 +193,10 @@ const resultMask = ref();
 var resultJsonFile = ref();
 
 const showMask = ref(true);
-var maskOpacity = ref(0.3);
-
+const maskOpacity = ref(0.3);
+var variableOpacity = {
+    'opacity': maskOpacity.value,
+}
 
 var modelParams = ref([
     {
@@ -238,15 +238,16 @@ var modelParams = ref([
 ]);
 let timer: null | NodeJS.Timeout = null;
 // millisecond
-var runTime;
-var runTimeMilSec = 0;
+var runTimer;
+const runTimeMilSec = ref(0);
 const startRunTime = () => {
-    runTime = setInterval(() => {
-        runTimeMilSec = runTimeMilSec + 50;
-    }, 50);
+    runTimeMilSec.value = 0;
+    runTimer = setInterval(() => {
+        runTimeMilSec.value = runTimeMilSec.value + 100;
+    }, 100);
 }
 const stopRunTime = () => {
-    runTime = clearInterval(runTime);
+    runTimer = clearInterval(runTimer);
 }
 
 
@@ -262,12 +263,8 @@ const changeMask = () => {
     // console.log(showMask);
     showMask.value = !showMask.value;
 }
-const changeMaskOpacity = () => {
-    // console.log(maskOpacity.value);
-    var maskdiv = document.getElementById('maskSlider');
-    if (maskdiv) {
-        maskdiv.style.opacity = maskOpacity.value.toString();
-    }
+const changeMaskOpacity = (value) => {
+    variableOpacity['opacity'] = value;
 }
 const handlePictureCardPreview = (file:File) => {
     console.log('===preview===')
@@ -324,7 +321,6 @@ const handleChange = async (event:Event) => {
         await uploadToSvr(formData);
         handlePictureCardPreview(file);
     }
-
 }
 
 const handleDrop = async (e: DragEvent) => {
@@ -348,6 +344,7 @@ const runModel = async () =>  {
     if (uploadFileName.value != null && uploadFileName.value != '' ) {
         console.log('===running model===');
         console.log(uploadFileName.value);
+        runTimeMilSec.value = 0;
         runState.value = 'loading';
         resultImgUrl.value = '';
         var iou, sta, point, minarea;
@@ -380,17 +377,19 @@ const runModel = async () =>  {
             });
             if (result.data.data.image_name) {
                 uploadFileName.value = result.data.data.image_name;
-                startRunTime();
+                
                 clearTimeout(Number(timer));
-                while (Number(timer) < 800 && runState.value == 'loading') {
-                    // console.log(Number(runTimeMilSec));
+                startRunTime();
+                while (runState.value == 'loading' && runTimeMilSec.value < 5000) {
+                    // console.log(runTimeMilSec);
                     await pollingInquiry();
                 }
                 stopRunTime();
-                if (Number(timer) >= 800 && runState.value == 'loading') {
-                    clearTimeout(Number(timer));
+                if (runState.value == 'loading' && runTimeMilSec.value >= 5000) {
                     runState.value = 'fail';
+                    errorMsg.value = "Time out!";
                 }
+                // clearTimeout(Number(timer));
                 
             } else {
                 runState.value = 'fail';
@@ -474,6 +473,11 @@ const inquiry = async () => {
             var resMaskPath = result.data.data.output_paths.mask_image.replace(/\.\//,'');
             var resJsonPath = result.data.data.output_paths.json.replace(/\.\//,'');
             getResultInfo(resImgName, resMaskPath, resJsonPath);
+        } else {
+            if (result.data.errors.length) {
+                runState.value = 'fail';
+                errorMsg.value = "Please use smaller iou and try again!";
+            }
         }
     } catch (err) {
         console.error(err);
@@ -488,6 +492,7 @@ const pollingInquiry = () => {
         }, 500);
     });
 }
+
 const generateResultImg = async (imgSrc:string, maskSrc:string, maskOpa:number, blendMode:GlobalCompositeOperation) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext("2d");
@@ -514,8 +519,8 @@ const handleClear = () => {
     // imgInput.value = ;
     imageUrl.value = '';
     upload.value = true;
-    // uploadFileName.value = '';
-    uploadFileName.value = '8c78a50c-0cd1-4982-90da-d4d2a6800f27.jpg';
+    uploadFileName.value = '';
+    // uploadFileName.value = '8c78a50c-0cd1-4982-90da-d4d2a6800f27.jpg';
 
     isEditParam.value = false;
     runState.value = 'ready';
@@ -543,21 +548,9 @@ const downloadFile = (src:string, filename:string) => {
     document.body.removeChild(link);
 }
 
-// const handleDownload = async () => {
-//     console.log("===Download===");
-//     generateResultImg(resultImgUrl.value, resultMaskUrl.value);
-// }
 
-// import timgUrl from '@/assets/img.jpg'
-// import tmaskUrl from '@/assets/mask2.png'
-// resultImgUrl.value = timgUrl;
-// resultMaskUrl.value = tmaskUrl;
 const downloadResult = async() => {
     console.log("===Download Result Image===");
-    // generateResultImg(resultImgUrl.value, resultMaskUrl.value);
-    // mergeImages([imgUrl, {maskUrl, opacity: 0.3}]).then(b64 => {
-    //     downloadFile(b64, 'coralscop-result.png');
-    // });
     var mergeUrl = await generateResultImg(resultImgUrl.value, resultMaskUrl.value, maskOpacity.value, 'multiply');
     downloadFile(mergeUrl, 'coralscop-result.png');
     
@@ -573,22 +566,10 @@ const downloadJson = async() => {
 const downloadAll = async() => {
     console.log("===Download All===");
     const zip = new JSZip();
-    // console.log(resultMask.value);
-    
-    // mergeImages([resultImgUrl.value, {src:resultMaskUrl.value, opacity: 0.3}]).then(b64 => {
-    //     const arr = b64.split(",");
-    //     // console.log(arr);
-    //     zip.file('coralscop-result.png', arr[1], {base64:true});
-    //     zip.file('coralscop-mask.png', resultMask.value.data, {binary:true});
-    //     zip.file('coralscop-json.json', resultJsonUrl.value, {binary:true});
-    //     // console.log(zip);
-    //     zip.generateAsync({ type: 'blob' }).then(content => {
-    //         // console.log(content);
-    //         downloadFile(URL.createObjectURL(content), 'coralscop-result.zip');
-    //     });
-    // });
+
     var mergeUrl = await generateResultImg(resultImgUrl.value, resultMaskUrl.value, maskOpacity.value, 'multiply');
-    zip.file('coralscop-result.png', mergeUrl.split(';base64,')[1], {binary:true});
+    console.log(mergeUrl);
+    zip.file('coralscop-result.png', mergeUrl.split(';base64,')[1], {base64:true});
     zip.file('coralscop-mask.png', resultMask.value.data, {binary:true});
     zip.file('coralscop-json.json', resultJsonUrl.value, {binary:true});
     zip.generateAsync({ type: 'blob' }).then(content => {
@@ -639,6 +620,7 @@ const downloadAll = async() => {
 .upload-image {
     object-fit: contain;
     margin: 5%;
+    height: 60vh;
 }
 
 .upload-text {
@@ -658,7 +640,7 @@ const downloadAll = async() => {
     right: 2%;
     justify-content: flex-end;
     gap: 3px;
-    z-index: 1px;
+    z-index: 110;
 }
 .mask-opacity-silder {
     min-width: 150px;
@@ -733,22 +715,53 @@ const downloadAll = async() => {
     transform: translateY(0);
 }
 
+.normal-btn {
+    padding: calc(.875rem - 1px) calc(1.5rem - 1px);
+    font-weight: 600;
+    font-size: 16px;
+    min-height: 48px;
+    background: rgb(255, 255, 255);
+    color: blueviolet;
+    border-radius: 8px;
+    border-bottom: 1px solid blueviolet;
+    border-right: 1px solid blueviolet;
+    border-top: 1px solid white;
+    border-left: 1px solid white;
+    transition-duration: 1s;
+    transition-property: border-top, border-left, border-bottom, border-right, box-shadow;
+}
+.normal-btn:hover {
+    border-top: 1px  solid blueviolet;
+    border-left: 1px  solid blueviolet;
+    border-bottom: 1px  solid blueviolet;
+    border-right: 1px  solid blueviolet;
+    /* border-bottom: 2px solid rgb(238, 103, 238);
+    border-right: 2px solid rgb(238, 103, 238); */
+    /* box-shadow: rgba(240, 46, 170, 0.4) 5px 5px, rgba(240, 46, 170, 0.3) 10px 10px, rgba(240, 46, 170, 0.2) 15px 15px; */
+}
+
 .model-params {
     display: grid;
     width: 100%;
     padding: 0;
     margin-top: 5px;
     background-color: white;
-    border-radius: 4px;
+    border-radius: 8px;
     border: 0.5px solid #E0E1E4;
+    border-bottom: 1px solid blueviolet;
+    border-right: 1px solid blueviolet;
     box-shadow: rgb(0 0 0 / 5%) 0 0 8px;
+}
+.model-params:hover,
+.model-params:focus {
+    border:1px solid blueviolet;
 }
 .model-param-head {
     cursor: pointer;    
     letter-spacing: 1.5px;
     display: flex;
     justify-content: space-between;
-    padding: 5px;
+    padding: 12px;
     text-align: center;
     align-items: center;
     span {
@@ -830,7 +843,7 @@ const downloadAll = async() => {
                 visibility: visible;
                 bottom: 20px;
                 /* background-color: #7020FF; */
-                background-image: linear-gradient(to right, #d628fe, #35a2fd);
+                background-image: linear-gradient(to right, blueviolet, #35a2fd);
                 height: fit-content;
             }
         }
@@ -861,15 +874,15 @@ const downloadAll = async() => {
     width: 100%;
     height: 100%;
     border-radius: 0;
-    background-color: #1175c7;
+    background-color: blueviolet;
     transition: all .3s;
   }
-  .custom-dot:hover {
+.custom-dot:hover {
     transform: rotateZ(45deg);
-  }
-  .custom-dot.focus {
+}
+.custom-dot.focus {
     border-radius: 50%;
-  }
+}
 
 .result-setting {
     display: flex;
@@ -912,47 +925,25 @@ const downloadAll = async() => {
         position: absolute;
         /* top: 5%; */
         z-index: 10;
-        object-fit: contain;
+        /* object-fit: contain; */
+        height: 60vh;
         margin: 10%;
     }
     .result-mask {
         text-align: center;
-        /* position: absolute; */
+        position: absolute;
         /* top: 5%; */
-        opacity: 60%;
+        /* opacity: 60%; */
         z-index: 100;
         mix-blend-mode: multiply;
-        object-fit: contain;
+        /* object-fit: contain; */
+        height: 60vh;
         margin: 10%;
     }
     .el-image {
         display: flex;
         overflow: hidden;
     }
-}
-@keyframes wrapper-gradient {
-0% {
-transform: translateX(-100%);
-}
-100% {
-transform: translateX(0);
-}
-}
-@keyframes img-gradient {
-0% {
-transform: translateX(100%);
-}
-100% {
-transform: translateX(0);
-}
-}
-.gradient-wrapper {
-/* display: inline-block;
-overflow: hidden; */
-animation: wrapper-gradient 10s linear;
-}
-.gradient-wrapper>img {
-animation: img-gradient 10s linear;
 }
 
 .checkbox-wrapper input[type="checkbox"] {
@@ -1012,7 +1003,7 @@ animation: img-gradient 10s linear;
 }
 
 .checkbox-wrapper input[type="checkbox"]:checked + .toggle:before {
-  background: #1175c7;
+  background: blueviolet;
 }
 
 .checkbox-wrapper input[type="checkbox"]:checked + .toggle span {
@@ -1020,73 +1011,73 @@ animation: img-gradient 10s linear;
 }
 
 .checkbox-wrapper input[type="checkbox"]:checked + .toggle span path {
-  stroke: #000000;
-  stroke-dasharray: 25;
-  stroke-dashoffset: 25;
+    stroke: #000000;
+    stroke-dasharray: 25;
+    stroke-dashoffset: 25;
 }
 .loader {
-  --path: #2f3545;
-  --dot: #5628ee;
-  --duration: 3s;
-  width: 44px;
-  height: 44px;
-  position: relative;
+    --path: #2f3545;
+    --dot: #5628ee;
+    --duration: 3s;
+    width: 44px;
+    height: 44px;
+    position: relative;
 }
 
 .loader:before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  position: absolute;
-  display: block;
-  background: var(--dot);
-  top: 37px;
-  left: 19px;
-  transform: translate(-18px, -18px);
-  animation: dotRect var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    position: absolute;
+    display: block;
+    background: var(--dot);
+    top: 37px;
+    left: 19px;
+    transform: translate(-18px, -18px);
+    animation: dotRect var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
 }
 
 .loader svg {
-  display: block;
-  width: 100%;
-  height: 100%;
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .loader svg rect, .loader svg polygon, .loader svg circle {
-  fill: none;
-  stroke: var(--path);
-  stroke-width: 10px;
-  stroke-linejoin: round;
-  stroke-linecap: round;
+    fill: none;
+    stroke: var(--path);
+    stroke-width: 10px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
 }
 
 .loader svg polygon {
-  stroke-dasharray: 145 76 145 76;
-  stroke-dashoffset: 0;
-  animation: pathTriangle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+    stroke-dasharray: 145 76 145 76;
+    stroke-dashoffset: 0;
+    animation: pathTriangle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
 }
 
 .loader svg rect {
-  stroke-dasharray: 192 64 192 64;
-  stroke-dashoffset: 0;
-  animation: pathRect 3s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+    stroke-dasharray: 192 64 192 64;
+    stroke-dashoffset: 0;
+    animation: pathRect 3s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
 }
 
 .loader svg circle {
-  stroke-dasharray: 150 50 150 50;
-  stroke-dashoffset: 75;
-  animation: pathCircle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+    stroke-dasharray: 150 50 150 50;
+    stroke-dashoffset: 75;
+    animation: pathCircle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
 }
 
 .loader.triangle {
-  width: 48px;
+    width: 48px;
 }
 
 .loader.triangle:before {
-  left: 21px;
-  transform: translate(-10px, -18px);
-  animation: dotTriangle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+    left: 21px;
+    transform: translate(-10px, -18px);
+    animation: dotTriangle var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
 }
 
 @keyframes pathTriangle {
@@ -1172,8 +1163,8 @@ animation: img-gradient 10s linear;
 }
 
 .loader {
-  display: inline-block;
-  margin: 0 16px;
+    display: inline-block;
+    margin: 0 16px;
 }
 
 .result-tool {
@@ -1183,31 +1174,14 @@ animation: img-gradient 10s linear;
     /* width: 40vw; */
 }
 .result-btn {
-    background-color: #FFFFFF;
-    border: 1px solid rgb(209,213,219);
-    /* border: 1px solid #5628ee; */
-    border-radius: 8px;
-    color: #111827;
     font-size: .875rem;
-    font-weight: 600;
-    line-height: 1.25rem;
-    padding: 8px 16px;
-    text-align: center;
-    min-height: 48px;
-    -webkit-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    /* min-height: 48px; */
     cursor: pointer;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-user-select: none;
-    -ms-touch-action: manipulation;
-    touch-action: manipulation;
 }
 
 .result-btn:hover {
     background-color: #FFFFFF;
-    color: #111827;
+    color: blueviolet;
 }
 
 .result-btn:focus {
@@ -1216,60 +1190,61 @@ animation: img-gradient 10s linear;
 }
 
 .result-btn:focus-visible {
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  border-color: rgba(0, 0, 0, 0.15);
-  outline: 0;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    border-color: rgba(0, 0, 0, 0.15);
+    outline: 0;
 }
 
 .download-content {
-  display: none;
-  font-size: 13px;
-  position: absolute;
-  z-index: 1;
-  min-width: 145px;
-  background-color: #FFFFFF;
-  border: 1px solid #5628ee;
-  /* border: 1px solid rgb(209,213,219); */
-  border-radius: 0px 8px 8px 8px;
-  box-shadow: 0px 8px 8px 0px rgba(0,0,0,0.2);
-  overflow: hidden;
-  margin-bottom: 10px;
+    display: none;
+    font-size: 13px;
+    position: absolute;
+    z-index: 1;
+    min-width: 145px;
+    background-color: #FFFFFF;
+    border: 1px solid blueviolet;
+    /* border: 1px solid rgb(209,213,219); */
+    border-radius: 0px 8px 8px 8px;
+    box-shadow: 0px 8px 8px 0px rgba(0,0,0,0.2);
+    overflow: hidden;
+    margin-bottom: 10px;
 }
 .download-item {
-  /* color: #5628ee; */
-  color: #111827;
-  padding: 8px 20px;
-  text-decoration: none;
-  display: block;
-  transition: 0.1s;
-  text-align: left;
-  /* padding-left: 5px; */
+    /* color: #5628ee; */
+    color: blueviolet;
+    padding: 8px 20px;
+    text-decoration: none;
+    display: block;
+    transition: 0.1s;
+    text-align: left;
+    /* padding-left: 5px; */
 }
 
 .download-item:hover {
     /* background-color: #35a2fd; */
-    background-image: linear-gradient(to right, #5628ee, #35a2fd);
+    background-image: linear-gradient(to right, blueviolet, #35a2fd);
     color: #FFFFFF;
     font-weight: bold;
     cursor: pointer;
 }
 
 .download-item:focus {
-  background-color: #212121;
-  color: #5628ee;
+    background-color: #212121;
+    color: blueviolet;
 }
 .download-btn {
     position: relative;
     display: block;
 }
 .download-btn:hover .download-content {
-  display: block;
+    display: block;
 }
 .download-btn:hover .result-btn{
     border-radius: 8px 8px 0px 0px;
+    border-top: 1px solid blueviolet;
+    border-left: 1px solid blueviolet;
     border-bottom: 0;
-    border: 1px solid #5628ee;
 }
 </style>
 
