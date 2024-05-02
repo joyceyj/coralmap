@@ -31,8 +31,11 @@
                 </el-image>
             </div>
 
-            <button class="run-btn" @click="runModel">Run</button>
-            <button class="normal-btn" @click="handleClear">Clear</button>
+            <div class="btn-tool">
+                <button class="run-btn" @click="runModel">Run</button>
+                <button class="normal-btn" style="width: 20vw;" @click="handleClear">Clear</button>
+            </div>
+            
             
             <div class="model-params">
                 <div class="model-param-head" @click="showModelParams">
@@ -80,7 +83,7 @@
             <div class="result-container">
                 <div class="img-btn-group" v-if="runState=='success'" >
                 <!-- <div class="img-btn-group" v-if="true" > -->
-                    <div>
+                    <div v-if="showMask">
                         <vue-slider 
                             v-model=maskOpacity
                             class="mask-opacity-silder"
@@ -136,7 +139,7 @@
 
             </div>
             
-            <div class="result-tool">
+            <div class="btn-tool">
                 <div class="download-btn">
                     <el-button :class="[runState=='success' ? 'result-btn  normal-btn' : 'normal-btn']" :disabled="!resultImgUrl || !resultMaskUrl || runState!='success'">Download&nbsp; ▼</el-button>
                     <!-- <el-button :class="[runState=='success' ? 'result-btn  normal-btn' : 'normal-btn']" :disabled="false">Download &nbsp; ▼</el-button> -->
@@ -686,7 +689,8 @@ const downloadAll = async() => {
 }
 
 .run-btn {
-    width: 100%;
+    /* width: 100%; */
+    width: 25vw;
     align-items: center;
     background: linear-gradient(to bottom right, #f3f4f6 , #e5e7eb );
     border: 1px solid #e5e7eb;
@@ -1185,10 +1189,11 @@ const downloadAll = async() => {
     margin: 0 16px;
 }
 
-.result-tool {
+.btn-tool {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    gap: 10px;
     /* width: 40vw; */
 }
 .result-btn {
