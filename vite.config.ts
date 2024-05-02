@@ -40,6 +40,11 @@ export default defineConfig( ( {mode} : ConfigEnv): UserConfig => {
                     target: 'https://coralscop-test.hkustvgd.com',
                     changeOrigin: true,
                     rewrite: (path) => path.replace(/^\/api/, '')
+                },
+                '/bke': {
+                    target: 'https://coralscop-bke.hkustvgd.com/api/v1/',
+                    changeOrigin: true,
+                    rewrite: (path) => path.replace(/^\/bke/, '')
                 }
             }
         }

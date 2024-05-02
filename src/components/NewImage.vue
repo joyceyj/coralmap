@@ -131,7 +131,7 @@
                 </div>
                 <div class="result-image" v-if="!resultImgUrl && runState=='fail'">
                     <el-tag type="danger">Error</el-tag>
-                    <span>{{ errorMsg }}</span>
+                    <span style="display:flex;">{{ errorMsg }}</span>
                 </div>
 
             </div>
@@ -293,7 +293,7 @@ const inputError = (type:string, msg:string) => {
 }
 const changeParams = (value:string, index:number) => {
     console.log(value, index);
-    console.log(modelParams);
+    // console.log(modelParams);
 }
 const uploadToSvr = async (formData:FormData) => {
     try {
@@ -340,13 +340,31 @@ const stopDrag = (e: DragEvent) => {
 
 }
 
+const clearResult = () => {
+    resultImgUrl.value = '';
+    resultMaskUrl.value = '';
+    // black and white image
+    maskUrl = '';
+    resultJsonUrl.value = '';
+
+    resultImg.value = '';
+    resultMask.value = '';
+    resultJsonFile.value = '';
+
+    showMask.value = true;
+    maskOpacity.value = 0.3;
+}
+
 const runModel = async () =>  {
     if (uploadFileName.value != null && uploadFileName.value != '' ) {
+        clearResult();
+
         console.log('===running model===');
-        console.log(uploadFileName.value);
+        // console.log(uploadFileName.value);
+
         runTimeMilSec.value = 0;
         runState.value = 'loading';
-        resultImgUrl.value = '';
+        
         var iou, sta, point, minarea;
         modelParams.value.forEach(element => {
             if (element.title == 'Point Per Side') {
@@ -380,14 +398,14 @@ const runModel = async () =>  {
                 
                 clearTimeout(Number(timer));
                 startRunTime();
-                while (runState.value == 'loading' && runTimeMilSec.value < 5000) {
+                while (runState.value == 'loading' && runTimeMilSec.value < 10000) {
                     // console.log(runTimeMilSec);
                     await pollingInquiry();
                 }
                 stopRunTime();
-                if (runState.value == 'loading' && runTimeMilSec.value >= 5000) {
+                if (runState.value == 'loading' && runTimeMilSec.value >= 10000) {
                     runState.value = 'fail';
-                    errorMsg.value = "Time out!";
+                    errorMsg.value = "Time out! Please use a smaller size of image and try again!";
                 }
                 // clearTimeout(Number(timer));
                 
@@ -468,15 +486,15 @@ const inquiry = async () => {
         });
         // console.log(result);
         if (result.data.isDone == 1) {
-            runState.value = 'success';
-            var resImgName = result.data.data.image_name;
-            var resMaskPath = result.data.data.output_paths.mask_image.replace(/\.\//,'');
-            var resJsonPath = result.data.data.output_paths.json.replace(/\.\//,'');
-            getResultInfo(resImgName, resMaskPath, resJsonPath);
-        } else {
             if (result.data.errors.length) {
                 runState.value = 'fail';
                 errorMsg.value = "Please use smaller iou and try again!";
+            } else {
+                runState.value = 'success';
+                var resImgName = result.data.data.image_name;
+                var resMaskPath = result.data.data.output_paths.mask_image.replace(/\.\//,'');
+                var resJsonPath = result.data.data.output_paths.json.replace(/\.\//,'');
+                getResultInfo(resImgName, resMaskPath, resJsonPath);
             }
         }
     } catch (err) {
@@ -568,7 +586,7 @@ const downloadAll = async() => {
     const zip = new JSZip();
 
     var mergeUrl = await generateResultImg(resultImgUrl.value, resultMaskUrl.value, maskOpacity.value, 'multiply');
-    console.log(mergeUrl);
+    // console.log(mergeUrl);
     zip.file('coralscop-result.png', mergeUrl.split(';base64,')[1], {base64:true});
     zip.file('coralscop-mask.png', resultMask.value.data, {binary:true});
     zip.file('coralscop-json.json', resultJsonUrl.value, {binary:true});

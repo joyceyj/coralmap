@@ -14,10 +14,10 @@
         <el-row :gutter="16">
             <el-col :span="8">
                 <div class="statistic-card">
-                    <el-statistic :value="3971">
+                    <el-statistic :value="locNum">
                         <template #title>
                             <div class="card-title">
-                                Number of sources
+                                Number of location
                             </div>
                         </template>
                     </el-statistic>
@@ -25,7 +25,7 @@
             </el-col>
             <el-col :span="8">
                 <div class="statistic-card">
-                    <el-statistic :value="3381420">
+                    <el-statistic :value="imageNum">
                         <template #title>
                             <div class="card-title">
                                 Number of images
@@ -36,10 +36,10 @@
             </el-col>
             <el-col :span="8">
                 <div class="statistic-card">
-                    <el-statistic :value=" 126135543">
+                    <el-statistic :value="annotationNum">
                         <template #title>
                             <div class="card-title">
-                                Number of point annotations
+                                Number of masks
                             </div>
                         </template>
                     </el-statistic>
@@ -54,6 +54,20 @@
 <script lang="ts" setup>
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+
+import axios from 'axios'
+
+
+// axios api setting
+axios.defaults.baseURL =
+  process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/api/v1/";
+const base = process.env.NODE_ENV === "development" ? "/bke" : "";
+
+const locNum = ref(0);
+const imageNum = ref(0);
+const annotationNum = ref(0);
+var map;
+
 // let pur = 'assets/marker_purple.svg';
 // let gre = 'assets/marker_green.svg'
 // var markerPurpleUrl = require('@/'+pur)
@@ -67,11 +81,15 @@ var privateIcon = L.icon({
     iconSize: [30, 30]                 // Width and height of the icon
 });
 
-
+const getSummary = async () => {
+    var data = await axios.get(base+'/summary/images');
+    console.log(data);
+    imageNum.value = data.data.length;
+}
 
 const initMap = () => {
     // const mapRef = ref(null);
-    let map;
+    // let map;
 
     map = L.map('mapRef', {
         center: [51.505, -0.09],
@@ -98,7 +116,8 @@ const initMap = () => {
 
 }
 onMounted(() => {
-    initMap()
+    initMap();
+    getSummary();
 })
 
 </script>
