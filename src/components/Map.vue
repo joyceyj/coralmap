@@ -39,7 +39,7 @@
                     <el-statistic :value="annotationNum">
                         <template #title>
                             <div class="card-title">
-                                Number of masks
+                                Number of annotations
                             </div>
                         </template>
                     </el-statistic>
@@ -52,11 +52,10 @@
 
   
 <script lang="ts" setup>
-import L from "leaflet";
+import L, { Point } from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 import axios from 'axios'
-
 
 // axios api setting
 axios.defaults.baseURL =
@@ -67,57 +66,85 @@ const locNum = ref(0);
 const imageNum = ref(0);
 const annotationNum = ref(0);
 var map;
+var summaryData;
+var siteData = {};
 
-// let pur = 'assets/marker_purple.svg';
-// let gre = 'assets/marker_green.svg'
-// var markerPurpleUrl = require('@/'+pur)
-// var markerGreenUrl = require('@/'+gre)
+import purpleicon from '@/assets/marker_purple.svg'
 var publicIcon = L.icon({
-    iconUrl: './src/assets/marker_purple.svg',            // Name of Material icon
+    iconUrl: purpleicon,            // Name of Material icon
     iconSize: [30, 30]                 // Width and height of the icon
 });
-var privateIcon = L.icon({
-    iconUrl: './src/assets/marker_green.svg',            // Name of Material icon
-    iconSize: [30, 30]                 // Width and height of the icon
-});
+// var privateIcon = L.icon({
+//     iconUrl: './src/assets/marker_green.svg',            // Name of Material icon
+//     iconSize: [30, 30]                 // Width and height of the icon
+// });
 
-const getSummary = async () => {
-    var data = await axios.get(base+'/summary/images');
-    console.log(data);
-    imageNum.value = data.data.length;
+const getSummaryData = async () => {
+    var res = await axios.get(base+'/summary/images');
+    summaryData = res.data;
+    // console.log(summaryData);
+    imageNum.value = summaryData.length;
 }
 
-const initMap = () => {
-    // const mapRef = ref(null);
-    // let map;
+const getSiteName = async (latitude,longitude) => {
+    var res = await axios.get('https://api.bigdatacloud.net/data/reverse-geocode-client', {
+        params: {
+            latitude: latitude,
+            longitude: longitude,
+            localityLanguage: 'en',
+        }
+    });
+    // console.log(res.data.locality);
+    return res.data.locality;
+}
 
+const initMap = async () => {
     map = L.map('mapRef', {
-        center: [51.505, -0.09],
+        center: [22.505, 95.09],
         zoom: 3,
-        minZoom: 3,
+        minZoom: 1,
         maxZoom: 10,
         // noWrap: true,
         zoomControl: true,
         // attributionControl: false
     });
-    // https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
-    // https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png
-    // https://tile.openstreetmap.org/{z}/{x}/{y}.png
-    // https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}{r}.png
     // http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png
-    // http://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    // L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    L.tileLayer("http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png").addTo(map);
+    // L.tileLayer("https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}").addTo(map);
 
-    L.marker([51.5, -0.09], {icon: publicIcon}).addTo(map)
-    L.marker([51.5, -13], {icon: publicIcon}).addTo(map)
-    L.marker([65, -40], {icon: publicIcon}).addTo(map)
-    L.marker([30, -70], {icon: publicIcon}).addTo(map)
-    L.marker([40, 13], {icon: privateIcon}).addTo(map)
+    await getSummaryData();
+    const s = new Set();
+    if (summaryData.length) {
+        summaryData.forEach(element => {
+            // console.log(element);
+            var site = element['geo']['coordinates'].join(",");
+            if (!s.has(site)) {
+                s.add(site);
+                siteData[site] = [];
+            }
+            siteData[site].push(element);            
+        });
+        locNum.value = s.size;
+        // console.log(s);
+        Object.keys(siteData).forEach(async key => {
+            // console.log(siteData[key]);
+            const mark = L.marker(siteData[key][0]['geo']['coordinates'], {icon: publicIcon}).addTo(map);
+            var sitename = await getSiteName(siteData[key][0]['geo']['coordinates'][0],siteData[key][0]['geo']['coordinates'][1]);
+            console.log(siteData[key],sitename);
+            mark.bindPopup(sitename+"<br>Number of images: "+siteData[key].length, {
+                className: 'popup',
+                offset: new Point(0,-10),
+                // closeButton: false,
+            });
+        })
+    }
+    
 
 }
 onMounted(() => {
     initMap();
-    getSummary();
+    
 })
 
 </script>
@@ -131,7 +158,7 @@ onMounted(() => {
     border-radius: 6px;
 }
 .map-statistic {
-    margin-top: 5px;
+    margin-top: 10px;
     margin-bottom: 5px;
 }
 
@@ -153,5 +180,11 @@ onMounted(() => {
     display: inline-flex; 
     align-items: center;
     font-weight: 700;
+}
+.popup {
+    width: 200px;
+    height: 100pxs;
+    border-radius: 8px;
+    text-align: center;
 }
 </style>

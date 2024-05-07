@@ -21,6 +21,7 @@ declare module 'vue' {
     ElStatistic: typeof import('element-plus/es')['ElStatistic']
     ElTag: typeof import('element-plus/es')['ElTag']
     Login: typeof import('./../components/Login.vue')['default']
+    Main: typeof import('./../components/Main.vue')['default']
     Map: typeof import('./../components/Map.vue')['default']
     Menu: typeof import('./../components/Menu.vue')['default']
     NewImage: typeof import('./../components/NewImage.vue')['default']

@@ -33,7 +33,7 @@
 
             <div class="btn-tool">
                 <button class="run-btn" @click="runModel">Run</button>
-                <button class="normal-btn" style="width: 20vw;" @click="handleClear">Clear</button>
+                <button class="normal-btn" style="width: 48%;" @click="handleClear">Clear</button>
             </div>
             
             
@@ -356,6 +356,7 @@ const clearResult = () => {
 
     showMask.value = true;
     maskOpacity.value = 0.3;
+    variableOpacity['opacity'] = maskOpacity.value;
 }
 
 const runModel = async () =>  {
@@ -639,9 +640,13 @@ const downloadAll = async() => {
     cursor: pointer;
 }
 .upload-image {
-    object-fit: contain;
-    margin: 5%;
-    height: 60vh;
+    /* object-fit: contain; */
+    position: absolute;
+    padding: 20px;
+    height: auto;
+    max-height: 525px;
+    width: auto;
+    max-width: 525px;
 }
 
 .upload-text {
@@ -690,7 +695,7 @@ const downloadAll = async() => {
 
 .run-btn {
     /* width: 100%; */
-    width: 25vw;
+    width: 48%;
     align-items: center;
     background: linear-gradient(to bottom right, #f3f4f6 , #e5e7eb );
     border: 1px solid #e5e7eb;
@@ -925,7 +930,7 @@ const downloadAll = async() => {
     min-width: min(160px, 100%);
     height: 600px;
     border-radius: 4px;
-    /* border: 2px #EBEBEF dashed; */
+    border: 2px #FFFFFF solid;
     background-color: white;
     overflow: hidden;
     padding: 0;
@@ -948,19 +953,25 @@ const downloadAll = async() => {
         /* top: 5%; */
         z-index: 10;
         /* object-fit: contain; */
-        height: 60vh;
-        margin: 10%;
+        height: auto;
+        max-height: 525px;
+        width: auto;
+        max-width: 525px;
+        padding: 20px;
     }
     .result-mask {
         text-align: center;
         position: absolute;
         /* top: 5%; */
         /* opacity: 60%; */
-        z-index: 100;
+        z-index: 30;
         mix-blend-mode: multiply;
         /* object-fit: contain; */
-        height: 60vh;
-        margin: 10%;
+        height: auto;
+        max-height: 525px;
+        width: auto;
+        max-width: 525px;
+        padding: 20px;
     }
     .el-image {
         display: flex;

@@ -77,7 +77,7 @@ body,
     /* height: $headHeight;
     max-height: $headHeight; */
     /* background-color: #001529; */
-    color: #ffffff;
+    color: #168DBD;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
