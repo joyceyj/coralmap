@@ -1,6 +1,6 @@
 <template>
     <label class="burger" for="burger">
-        <input type="checkbox" id="burger" :onchange="handleShowMenu">
+        <input type="checkbox" id="burger" ref="menuInput" :onchange="handleShowMenu">
         <span></span>
         <span></span>
         <span></span>
@@ -9,7 +9,7 @@
         <nav>
             <ul class="menu-content list-style-none">
                 <li class="menu-items" v-for="(item, index) in navList" :key="index">
-                    <RouterLink :to="item.path" class="menu-item" active-class="active-menu-item">{{ item.title }}</RouterLink>
+                    <RouterLink :to="item.path" class="menu-item" active-class="active-menu-item" @click="handleRoute">{{ item.title }}</RouterLink>
                 </li>
             </ul>
         </nav>
@@ -29,6 +29,7 @@
 
 <script lang="ts" setup>
 const showMenu = ref(false);
+const menuInput = ref();
 
 const navList = [{
     title: 'Home',
@@ -40,6 +41,10 @@ const navList = [{
 
 const handleShowMenu = () => {
     showMenu.value = !showMenu.value;
+}
+
+const handleRoute = () => {
+    menuInput.value.click();
 }
 </script>
 

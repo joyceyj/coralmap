@@ -612,7 +612,7 @@ body {
   height: auto;
   width: 100vw;
   display: block;
-  background-color: #FAFBFD;
+  background-color: #FAFAFA;
   font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
@@ -624,7 +624,7 @@ body {
     height: auto;
     /* margin: 30px; */
     padding: 60px 30px 0 30px;
-    background-color: #FAFBFD;
+    background-color: #FAFAFA;
     /* background-color: #c8ccd4; */
 }
 
@@ -646,7 +646,7 @@ body {
     align-items: center;
     text-align: center;
     min-width: min(160px, 100%);
-    height: 600px;
+    height: 75vh;
     border-radius: 4px;
     border: 2px #EBEBEF dashed;
     background-color: white;
@@ -658,11 +658,11 @@ body {
 .upload-image {
     /* object-fit: contain; */
     position: absolute;
-    padding: 20px;
+    padding: 10px;
     height: auto;
-    max-height: 525px;
+    max-height: 68vh;
     width: auto;
-    max-width: 525px;
+    max-width: 68vh;
 }
 
 .upload-text {
@@ -939,7 +939,7 @@ body {
     align-items: center;
     text-align: center;
     min-width: min(160px, 100%);
-    height: 600px;
+    height: 75vh;
     border-radius: 4px;
     border: 2px #FFFFFF solid;
     background-color: white;
@@ -965,9 +965,9 @@ body {
         z-index: 10;
         /* object-fit: contain; */
         height: auto;
-        max-height: 525px;
+        max-height: 68vh;
         width: auto;
-        max-width: 525px;
+        max-width: 68vh;
         padding: 20px;
     }
     .result-mask {
@@ -979,9 +979,9 @@ body {
         mix-blend-mode: multiply;
         /* object-fit: contain; */
         height: auto;
-        max-height: 525px;
+        max-height: 68vh;
         width: auto;
-        max-width: 525px;
+        max-width: 68vh;
         padding: 20px;
     }
     .el-image {

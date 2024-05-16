@@ -8,7 +8,7 @@
     </div>
 
     <div class="foot">
-        <p>CoralSCOP</p>
+        <!-- <p>CoralSCOP</p> -->
     </div>
     
 
@@ -27,7 +27,7 @@ body {
   height: auto;
   width: 100vw;
   display: block;
-  background-color: #FAFBFD;
+  background-color: #FAFAFA;
   font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
@@ -35,7 +35,7 @@ body {
     width: 100vw;
     height: auto;
     /* margin-bottom: 20px; */
-    background-color: #FAFBFD;
+    background-color: #FAFAFA;
 
 }
 .side-menu {
@@ -48,7 +48,8 @@ body {
     width: 100vw;
     height: 120px;
     /* margin-top: 20px; */
-    background-color: rgb(19, 159, 225);
+    /* background-color: rgb(19, 159, 225); */
+    /* background-color: #FAFAFA; */
     p {
         color: white;
         font-family: MarkerFelt;

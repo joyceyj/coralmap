@@ -51,12 +51,14 @@ body,
   height: auto;
   width: 100vw;
   display: block;
-  background-color: #F0F0F0;
+  background-color: #FAFAFA;
 }
 .background {
     display: flex;
+    margin: 0;
+    padding: 0;
     width: 100vw;
-    height: auto;
+    height: 100vh;
 }
 .home-logo {
     position: absolute;
@@ -77,7 +79,7 @@ body,
 }
 .homepage-intro {
     position: absolute;
-    top: 20vh;
+    top: 10vh;
     left: 10vw;
     display: flex;
     flex-direction: column;
@@ -133,7 +135,9 @@ body,
 .map-view {
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 24px;
+    margin-left: 100px;
+    margin-right: 100px;
     text-align: center;
 }
 </style>

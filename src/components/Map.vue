@@ -17,7 +17,7 @@
                     <el-statistic :value="locNum">
                         <template #title>
                             <div class="card-title">
-                                Number of location
+                                Number of sites
                             </div>
                         </template>
                     </el-statistic>
@@ -132,7 +132,7 @@ const initMap = async () => {
             const mark = L.marker(siteData[key][0]['geo']['coordinates'], {icon: publicIcon}).addTo(map);
             var sitename = await getSiteName(siteData[key][0]['geo']['coordinates'][0],siteData[key][0]['geo']['coordinates'][1]);
             // console.log(siteData[key],sitename);
-            mark.bindPopup(sitename+"<br>Number of images: "+siteData[key].length, {
+            mark.bindPopup("<b>"+sitename+"</b> <br>Number of images: "+siteData[key].length, {
                 className: 'popup',
                 offset: new Point(0,-10),
                 // closeButton: false,
@@ -157,7 +157,7 @@ body {
   height: auto;
   width: 100vw;
   display: block;
-  background-color: #FAFBFD;
+  background-color: #FAFAFA;
   font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
