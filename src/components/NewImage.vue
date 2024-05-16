@@ -63,8 +63,8 @@
                             :min=item.min 
                             :max=item.max 
                             :interval=item.interval
-                            :process-style="{ backgroundColor: 'blueviolet' }"
-                            :tooltip-style="{ backgroundColor: 'blueviolet', borderColor: 'blueviolet' }"
+                            :process-style="{ backgroundColor: '#139FE1' }"
+                            :tooltip-style="{ backgroundColor: '#139FE1', borderColor: '#139FE1' }"
                             :contained="true"
                             @error="inputError"
                             @change="changeParams"
@@ -90,8 +90,8 @@
                             :min=0.0 
                             :max=1.0
                             :interval=0.05
-                            :process-style="{ backgroundColor: 'blueviolet' }"
-                            :tooltip-style="{ backgroundColor: 'blueviolet', borderColor: 'blueviolet' }"
+                            :process-style="{ backgroundColor: '#139FE1' }"
+                            :tooltip-style="{ backgroundColor: '#139FE1', borderColor: '#139FE1' }"
                             :tooltip-placement="['bottom']"
                             :contained="true"
                             @change="changeMaskOpacity"
@@ -605,11 +605,27 @@ const downloadAll = async() => {
 </script>
 
 <style>
+html,
+body {
+  padding: 0;
+  margin: 0;
+  height: auto;
+  width: 100vw;
+  display: block;
+  background-color: #FAFBFD;
+  font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
 .model-container {
     display: flex;
-    gap: 16px;
+    gap: 20px;
     align-items: stretch;
-    width: 100%;
+    width: 95vw;
+    height: auto;
+    /* margin: 30px; */
+    padding: 60px 30px 0 30px;
+    background-color: #FAFBFD;
+    /* background-color: #c8ccd4; */
 }
 
 .model-setting {
@@ -697,12 +713,13 @@ const downloadAll = async() => {
     /* width: 100%; */
     width: 48%;
     align-items: center;
-    background: linear-gradient(to bottom right, #f3f4f6 , #e5e7eb );
+    /* background: linear-gradient(to bottom right, #f3f4f6 , #e5e7eb ); */
+    background: linear-gradient(to bottom right, #139FE1 , #70B4D5 );
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
+    box-shadow: #70B4D5 0 1px 3px 0;
     box-sizing: border-box;
-    color: #374151;
+    color: white;
     cursor: pointer;
     display: inline-flex;
     font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -719,25 +736,25 @@ const downloadAll = async() => {
 
 .run-btn:hover,
 .run-btn:focus {
-    border-color: #e5e7eb;
+    border-color: rgb(229, 231, 235);
     box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
-    color: rgba(0, 0, 0, 0.65);
+    /* color: rgba(0, 0, 0, 0.65); */
 }
 
 .run-btn:hover {
- transform: translateY(-1px);
- background-color: linear-gradient(to bottom right, #f3f4f6 , #f3f4f6 );
+    transform: scale(1.01);
+    background-color: linear-gradient(to bottom right, #139FE1 , #70B4D5 );
 }
 .run-btn:focus,
 .run-btn:focus-visible {
-    border-color: rgba(0, 0, 0, 0.15);
+    border-color: rgba(229, 231, 235, 0.15);
     outline: 0;
 }
 
 .run-btn:active {
     background-color: #F0F0F1;
-    border-color: rgba(0, 0, 0, 0.15);
-    box-shadow: rgba(0, 0, 0, 0.06) 0 2px 4px;
+    border-color: rgba(229, 231, 235, 0.15);
+    box-shadow: rgba(229, 231, 235 0.06) 0 2px 4px;
     color: rgba(0, 0, 0, 0.65);
     transform: translateY(0);
 }
@@ -748,40 +765,34 @@ const downloadAll = async() => {
     font-size: 16px;
     min-height: 48px;
     background: rgb(255, 255, 255);
-    color: blueviolet;
+    color: #139FE1;
     border-radius: 8px;
-    border-bottom: 1px solid blueviolet;
-    border-right: 1px solid blueviolet;
-    border-top: 1px solid white;
-    border-left: 1px solid white;
+    border: 1px solid #139FE1;
     transition-duration: 1s;
     transition-property: border-top, border-left, border-bottom, border-right, box-shadow;
 }
+.normal-btn:focus,
 .normal-btn:hover {
-    border-top: 1px  solid blueviolet;
-    border-left: 1px  solid blueviolet;
-    border-bottom: 1px  solid blueviolet;
-    border-right: 1px  solid blueviolet;
-    /* border-bottom: 2px solid rgb(238, 103, 238);
-    border-right: 2px solid rgb(238, 103, 238); */
-    /* box-shadow: rgba(240, 46, 170, 0.4) 5px 5px, rgba(240, 46, 170, 0.3) 10px 10px, rgba(240, 46, 170, 0.2) 15px 15px; */
+    /* transform: translateY(-1px); */
+    border: 1px solid #139FE1;
+    box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
+    outline: none;
 }
 
 .model-params {
     display: grid;
     width: 100%;
     padding: 0;
-    margin-top: 5px;
+    margin: 5px 0 20px 0;
     background-color: white;
     border-radius: 8px;
     border: 0.5px solid #E0E1E4;
-    border-bottom: 1px solid blueviolet;
-    border-right: 1px solid blueviolet;
+    border: 1px solid #139FE1;
     box-shadow: rgb(0 0 0 / 5%) 0 0 8px;
 }
 .model-params:hover,
 .model-params:focus {
-    border:1px solid blueviolet;
+    border:1px solid #139FE1;
 }
 .model-param-head {
     cursor: pointer;    
@@ -792,10 +803,10 @@ const downloadAll = async() => {
     text-align: center;
     align-items: center;
     span {
-        /* font-weight: 400; */
+        font-weight: 800;
         font-size: 14px;
         /* font-family: SourceHanSansCN-Regular, SourceHanSansCN-Medium, SourceHanSansCN-Bold,'Source Sans Pro', 'ui-sans-serif', 'system-ui', sans-serif; */
-        color: #374151;
+        color: #139FE1;
         text-indent: 8px;
         letter-spacing: 0cap;
     }
@@ -870,7 +881,7 @@ const downloadAll = async() => {
                 visibility: visible;
                 bottom: 20px;
                 /* background-color: #7020FF; */
-                background-image: linear-gradient(to right, blueviolet, #35a2fd);
+                background-image: linear-gradient(to right, #139FE1, #35a2fd);
                 height: fit-content;
             }
         }
@@ -901,7 +912,7 @@ const downloadAll = async() => {
     width: 100%;
     height: 100%;
     border-radius: 0;
-    background-color: blueviolet;
+    background-color: #139FE1;
     transition: all .3s;
   }
 .custom-dot:hover {
@@ -1036,7 +1047,7 @@ const downloadAll = async() => {
 }
 
 .checkbox-wrapper input[type="checkbox"]:checked + .toggle:before {
-  background: blueviolet;
+  background: #139FE1;
 }
 
 .checkbox-wrapper input[type="checkbox"]:checked + .toggle span {
@@ -1215,7 +1226,7 @@ const downloadAll = async() => {
 
 .result-btn:hover {
     background-color: #FFFFFF;
-    color: blueviolet;
+    color: #139FE1;
 }
 
 .result-btn:focus {
@@ -1237,7 +1248,7 @@ const downloadAll = async() => {
     z-index: 1;
     min-width: 145px;
     background-color: #FFFFFF;
-    border: 1px solid blueviolet;
+    border: 1px solid #139FE1;
     /* border: 1px solid rgb(209,213,219); */
     border-radius: 0px 8px 8px 8px;
     box-shadow: 0px 8px 8px 0px rgba(0,0,0,0.2);
@@ -1246,7 +1257,7 @@ const downloadAll = async() => {
 }
 .download-item {
     /* color: #5628ee; */
-    color: blueviolet;
+    color: #139FE1;
     padding: 8px 20px;
     text-decoration: none;
     display: block;
@@ -1257,7 +1268,7 @@ const downloadAll = async() => {
 
 .download-item:hover {
     /* background-color: #35a2fd; */
-    background-image: linear-gradient(to right, blueviolet, #35a2fd);
+    background-image: linear-gradient(to right, #139FE1, #35a2fd);
     color: #FFFFFF;
     font-weight: bold;
     cursor: pointer;
@@ -1265,7 +1276,7 @@ const downloadAll = async() => {
 
 .download-item:focus {
     background-color: #212121;
-    color: blueviolet;
+    color: #139FE1;
 }
 .download-btn {
     position: relative;
@@ -1276,8 +1287,8 @@ const downloadAll = async() => {
 }
 .download-btn:hover .result-btn{
     border-radius: 8px 8px 0px 0px;
-    border-top: 1px solid blueviolet;
-    border-left: 1px solid blueviolet;
+    border-top: 1px solid #139FE1;
+    border-left: 1px solid #139FE1;
     border-bottom: 0;
 }
 </style>

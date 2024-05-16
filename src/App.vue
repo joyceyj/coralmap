@@ -1,112 +1,63 @@
 <template>
-    <div class="app_container">
-        <div class="common-layout">
-            
-            <el-container>
-                <!-- header -->
-                 <el-header class="header">
-                    <div>
-                        <span class="title">CoralSCOP</span>
-                    </div>
-                            
-                    <RouterLink to="/login" class="log-in-button">
-                        <span>Log in</span>
-                    </RouterLink>
-
-
-                    
-                </el-header>
-                
-
-                <el-container>
-                    <!-- aside -->
-                    <el-aside class="aside">
-                        <Menu />
-                    </el-aside>
-
-                    <!-- main -->
-                    <el-main class="main">
-                        <!-- <Map /> -->
-                        <RouterView></RouterView>
-                    </el-main>
-
-                </el-container>
-
-            </el-container>
-        </div>
+    <div class="side-menu">
+        <Menu></Menu>
     </div>
+    
+    <div class="main-content">
+        <RouterView></RouterView>
+    </div>
+
+    <div class="foot">
+        <p>CoralSCOP</p>
+    </div>
+    
+
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 
-export default{
-    name: 'app',
-    setup(){
-        
-    },
-    mounted() {
-        this.$router.push({
-            name: 'map',
-        });
-    },
-
-}
 </script>
 
 <style scoped>
 /* 手动配置全局样式 */
 html,
-body,
-.app_container,
-.el-container {
+body {
   padding: 0;
   margin: 0;
-  height: 100vh;
+  height: auto;
   width: 100vw;
+  display: block;
+  background-color: #FAFBFD;
+  font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
 }
-/* 背景颜色 */
-.aside {
-    /* background-color: #545c64; */
-    width: 170px;
-    border-right: 2px solid #F2F3F7;
-}
-.main { 
-  background-color: #F5F6FA;
-}
-.header {
-    /* height: $headHeight;
-    max-height: $headHeight; */
-    /* background-color: #001529; */
-    color: #168DBD;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    box-sizing: border-box;
-    border-bottom: 2px solid #F2F3F7;
+
+.main-content {
     width: 100vw;
-    .div {
-        display: flex;
-        align-items: center;
+    height: auto;
+    /* margin-bottom: 20px; */
+    background-color: #FAFBFD;
+
+}
+.side-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1600;
+}
+.foot {
+    width: 100vw;
+    height: 120px;
+    /* margin-top: 20px; */
+    background-color: rgb(19, 159, 225);
+    p {
+        color: white;
+        font-family: MarkerFelt;
+        font-weight: bold;
+        font-size: 26px;
+        margin: 0;
+        position: relative;
+        top: 30px;
+        left: -500px;
     }
-    
 }
-
-.title {
-    margin-left: 16px;
-    font-size: 24px;
-    font-family: "Poppins", "Poppins-Medium";
-    font-weight: 600;
-    background-image: linear-gradient(to right, #d628fe, #35a2fd);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
-.log-in-button {
-    display: flex;
-    position: relative;
-    justify-content: flex-end;
-    cursor: pointer;
-}
-
 </style>

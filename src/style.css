@@ -92,3 +92,7 @@ button:focus-visible {
   font-family: SourceHanSansCN-Bold;
   src: url("../public/fonts/SourceHanSansCN-Bold.otf");
 }
+@font-face {
+  font-family: MarkerFelt;
+  src: url("../public/fonts/Marker Felt.ttf");
+}

@@ -102,7 +102,7 @@ const initMap = async () => {
     map = L.map('mapRef', {
         center: [22.505, 95.09],
         zoom: 3,
-        minZoom: 1,
+        minZoom: 3,
         maxZoom: 10,
         // noWrap: true,
         zoomControl: true,
@@ -131,7 +131,7 @@ const initMap = async () => {
             // console.log(siteData[key]);
             const mark = L.marker(siteData[key][0]['geo']['coordinates'], {icon: publicIcon}).addTo(map);
             var sitename = await getSiteName(siteData[key][0]['geo']['coordinates'][0],siteData[key][0]['geo']['coordinates'][1]);
-            console.log(siteData[key],sitename);
+            // console.log(siteData[key],sitename);
             mark.bindPopup(sitename+"<br>Number of images: "+siteData[key].length, {
                 className: 'popup',
                 offset: new Point(0,-10),
@@ -150,16 +150,27 @@ onMounted(() => {
 </script>
 
 <style>
+html,
+body {
+  padding: 0;
+  margin: 0;
+  height: auto;
+  width: 100vw;
+  display: block;
+  background-color: #FAFBFD;
+  font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
 .map-container {
   height: 75vh;
-  width: 85vw;
+  width: auto;
 }
 #mapRef {
     border-radius: 6px;
 }
 .map-statistic {
     margin-top: 10px;
-    margin-bottom: 5px;
+    margin-bottom: 25px;
 }
 
 :global(h2#card-usage ~ .example .example-showcase) {
