@@ -1,4 +1,7 @@
 <template>
+    <!-- <div class="map-title">
+        <p>MAP OF SOURCES</p>
+    </div> -->
     <div class="map-container" id="mapRef">
         <!-- <l-map
             v-model="zoom"
@@ -58,8 +61,9 @@ import "leaflet/dist/leaflet.css";
 import axios from 'axios'
 
 // axios api setting
+const bkeUrl = "https://coralscop-bke.hkustvgd.com";
 axios.defaults.baseURL =
-  process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/api/v1/";
+  process.env.NODE_ENV === "development" ? "" : "https://coralscop-bke.hkustvgd.com/api/v1";
 const base = process.env.NODE_ENV === "development" ? "/bke" : "";
 
 const locNum = ref(0);
@@ -69,9 +73,9 @@ var map;
 var summaryData;
 var siteData = {};
 
-import purpleicon from '@/assets/marker_purple.svg'
+import blueicon from '@/assets/marker_blue.svg'
 var publicIcon = L.icon({
-    iconUrl: purpleicon,            // Name of Material icon
+    iconUrl: blueicon,            // Name of Material icon
     iconSize: [30, 30]                 // Width and height of the icon
 });
 // var privateIcon = L.icon({
@@ -86,6 +90,22 @@ const getSummaryData = async () => {
     imageNum.value = summaryData.length;
 }
 
+// const myGoogleMapToken = 'AIzaSyDRqsEg7eFHRm0GB1XoLXfG_HY7PectB94';
+// const GoogleMapGeocodingUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
+// // google map
+// const getSiteName = async (latitude,longitude) => {
+    
+//     var res = await axios.get(GoogleMapGeocodingUrl , {
+//         params: {
+//             latlng: latitude.toString()+","+longitude.toString(),
+//             key: myGoogleMapToken,
+//             language: 'en',
+//         }
+//     });
+//     console.log(res);
+//     return res.data.results.formatted_address;
+// }
+// bigdat cloud
 const getSiteName = async (latitude,longitude) => {
     var res = await axios.get('https://api.bigdatacloud.net/data/reverse-geocode-client', {
         params: {
@@ -132,8 +152,23 @@ const initMap = async () => {
             const mark = L.marker(siteData[key][0]['geo']['coordinates'], {icon: publicIcon}).addTo(map);
             var sitename = await getSiteName(siteData[key][0]['geo']['coordinates'][0],siteData[key][0]['geo']['coordinates'][1]);
             // console.log(siteData[key],sitename);
-            mark.bindPopup("<b>"+sitename+"</b> <br>Number of images: "+siteData[key].length, {
-                className: 'popup',
+            // console.log("https://coralscop-bke.hkustvgd.com"+siteData[key][0]['image_name']);
+            // var content = "<b>"+sitename+"</b> <br>Number of images: "+siteData[key].length;
+            var content = "<div class='popup-content'>"
+                        + "<p class='popup-title'>" + sitename + "</p>"
+                        + "<p> Number of images: "+siteData[key].length+"</p>"
+                        + "<div class='popup-img'><img src="+bkeUrl+siteData[key][0]['image_name']+" style='width:120px;height:120px;' />";
+            
+            if (siteData[key].length > 1) {
+                content = content + "<img src="+bkeUrl+siteData[key][1]['image_name']+" style='width:120px;height:120px;' />";
+            }
+            if (siteData[key].length > 2) {
+                content = content + "<img src="+bkeUrl+siteData[key][2]['image_name']+" style='width:120px;height:120px;' />";
+            }
+            content = content + "</div></div>";
+            
+            mark.bindPopup(content, {
+                className: 'custom-popup',
                 offset: new Point(0,-10),
                 // closeButton: false,
             });
@@ -160,14 +195,46 @@ body {
   background-color: #FAFAFA;
   font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
 }
-
 .map-container {
   height: 75vh;
   width: auto;
+  border: 2px solid #E2E5E6;
 }
 #mapRef {
     border-radius: 6px;
 }
+.custom-popup {
+    /* background-color: #139FE1; */
+    /* color: #FAFAFA; */
+    /* padding: 10px; */
+    border-radius: 8px;
+    width: 420px;
+    /* min-width: 550px; */
+}
+/* .leaflet-popup-close-button {
+  color: #139FE1;
+  background-color: #139FE1;
+} */
+.popup-content {
+    display: flex;
+    justify-items: flex-start;
+    flex-direction: column;
+    width: 380px;
+    gap: 5px;
+    p {
+        margin: 0;
+    }    
+}
+.popup-title {
+    font-weight: 600;
+}
+
+.popup-img {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
 .map-statistic {
     margin-top: 10px;
     margin-bottom: 25px;

@@ -5,8 +5,22 @@
     </div>
 
     <el-container>
-        <el-image class="background"  :src="mainBgUrl" ></el-image>
-        <div class="homepage-intro">
+        <div class="homepage-cover" :style="{'background-image': 'url('+mainBgUrl+')'}">
+            <div class="homepage-intro">
+                <div class="intro-text">
+                    <p>CoralSCOP</p>
+                </div>
+                <div class="intro-text">
+                    <p>Segment any COral Image on this Planet</p>
+                </div>
+                <div class="describe-text">
+                    <p>The first foundation model that can segment dense coral reef automatically and has strong generalization ability to project the full image of coral reef. </p>
+                </div>
+                <button class='model-btn basic-btn' @click="routeToTryModel">Try for Free</button>
+            </div>
+        </div>
+        <!-- <el-image  style="width:100%;height:100vh;" :src="mainBgUrl" ></el-image> -->
+        <!-- <div class="homepage-intro">
             <div class="intro-text">
                 <p>CoralSCOP</p>
             </div>
@@ -17,10 +31,27 @@
                 <p>The first foundation model that can segment dense coral reef automatically and has strong generalization ability to project the full image of coral reef. </p>
             </div>
             <button class='model-btn basic-btn' @click="routeToTryModel">Try for Free</button>
-        </div>
+        </div> -->
 
         <div class="map-view">
+            <div class="sub-title">
+                <p>MAP OF SOURCES</p>
+            </div>  
             <Map></Map>
+        </div>
+
+        <div>
+            <div class="sub-title">
+                <p>Demo</p>
+            </div> 
+            <ImageContrast :width=width :height=height>
+                <template #left>
+                    <img :src="beforeUrl" class="images" :style="'width:' + width + 'px;height:' + height + 'px'"/>
+                </template>
+                <template #right>
+                    <img :src="afterUrl" class="images" :style="'width:' + width + 'px;height:' + height + 'px'"/>
+                </template>
+            </ImageContrast>
         </div>
         
 
@@ -30,6 +61,10 @@
 <script lang="ts" setup>
 import mainBgUrl from '@/assets/P8093252.png'
 import logoUrl from '@/assets/coral_logo.png'
+import beforeUrl from '@/assets/image60.jpg'
+import afterUrl from '@/assets/image59.png'
+const width = '1000';
+const height = '400';
 
 import { useRouter } from 'vue-router';
 const { push } = useRouter();
@@ -49,16 +84,21 @@ body,
   padding: 0;
   margin: 0;
   height: auto;
-  width: 100vw;
+  width: 100%;
   display: block;
   background-color: #FAFAFA;
 }
-.background {
+.homepage-cover {
     display: flex;
     margin: 0;
     padding: 0;
-    width: 100vw;
+    /* width: 100vw; */
+    /* max-height: 100vh; */
     height: 100vh;
+    min-height: 864px;
+    /* object-fit: contain; */
+    /* background-image: mainBgUrl; */
+    background-size: cover;
 }
 .home-logo {
     position: absolute;
@@ -139,5 +179,26 @@ body,
     margin-left: 100px;
     margin-right: 100px;
     text-align: center;
+}
+.sub-title {
+    margin: 30px;
+    margin-bottom: 45px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    p {
+        margin: 0;
+        border-top: 3px solid #139FE1;
+        border-bottom: 3px solid #139FE1;
+        color: #139FE1;
+        font-size: 40px;
+        font-weight: 600;
+        font-family: SourceHanSansCN-Bold;
+        text-align: center;
+        margin: 0;
+        padding-left: 30px;
+        padding-right: 30px;
+        /* width: 50vw; */
+    }
 }
 </style>

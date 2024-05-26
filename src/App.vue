@@ -22,13 +22,14 @@
 /* 手动配置全局样式 */
 html,
 body {
-  padding: 0;
-  margin: 0;
-  height: auto;
-  width: 100vw;
-  display: block;
-  background-color: #FAFAFA;
-  font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
+    padding: 0;
+    margin: 0;
+    height: auto;
+    width: 100vw;
+    display: block;
+    background-color: #FAFAFA;
+    font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust: 100%;
 }
 
 .main-content {
@@ -36,6 +37,8 @@ body {
     height: auto;
     /* margin-bottom: 20px; */
     background-color: #FAFAFA;
+    display: flex;
+    justify-content: center;
 
 }
 .side-menu {

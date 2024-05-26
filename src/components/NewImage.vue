@@ -133,8 +133,8 @@
                     </div>
                 </div>
                 <div class="result-image" v-if="!resultImgUrl && runState=='fail'">
-                    <el-tag type="danger">Error</el-tag>
-                    <span style="display:flex;">{{ errorMsg }}</span>
+                    <!-- <el-tag type="danger">Error</el-tag> -->
+                    <span style="display:flex; color: red; font-size:large; font-weight: 600;">{{ errorMsg }}</span>
                 </div>
 
             </div>
@@ -402,12 +402,12 @@ const runModel = async () =>  {
                 
                 clearTimeout(Number(timer));
                 startRunTime();
-                while (runState.value == 'loading' && runTimeMilSec.value < 10000) {
+                while (runState.value == 'loading' && runTimeMilSec.value < 60000) {
                     // console.log(runTimeMilSec);
                     await pollingInquiry();
                 }
                 stopRunTime();
-                if (runState.value == 'loading' && runTimeMilSec.value >= 10000) {
+                if (runState.value == 'loading' && runTimeMilSec.value >= 60000) {
                     runState.value = 'fail';
                     errorMsg.value = "Time out! Please use a smaller size of image and try again!";
                 }
@@ -492,7 +492,7 @@ const inquiry = async () => {
         if (result.data.isDone == 1) {
             if (result.data.errors.length) {
                 runState.value = 'fail';
-                errorMsg.value = "Please use smaller iou and try again!";
+                errorMsg.value = "Something went wrong! Please use smaller iou and try again!";
             } else {
                 runState.value = 'success';
                 var resImgName = result.data.data.image_name;
@@ -607,23 +607,27 @@ const downloadAll = async() => {
 <style>
 html,
 body {
-  padding: 0;
-  margin: 0;
-  height: auto;
-  width: 100vw;
-  display: block;
-  background-color: #FAFAFA;
-  font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
+    padding: 0;
+    margin: 0;
+    height: auto;
+    width: 100vw;
+    display: block;
+    background-color: #FAFAFA;
+    font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
+    text-align: center;
+    justify-content: center;
 }
 
 .model-container {
     display: flex;
-    gap: 20px;
+    justify-content: space-between;
+    gap: 40px;
     align-items: stretch;
-    width: 95vw;
+    width: 85vw;
     height: auto;
     /* margin: 30px; */
-    padding: 60px 30px 0 30px;
+    /* margin-left: 100px; */
+    padding: 60px 0 0 0;
     background-color: #FAFAFA;
     /* background-color: #c8ccd4; */
 }
@@ -658,7 +662,7 @@ body {
 .upload-image {
     /* object-fit: contain; */
     position: absolute;
-    padding: 10px;
+    padding: 20px;
     height: auto;
     max-height: 68vh;
     width: auto;
