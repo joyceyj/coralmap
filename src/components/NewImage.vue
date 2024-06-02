@@ -152,8 +152,26 @@
                     </div>
                 </div>
                 
-                <el-button class="result-btn normal-btn" :disabled="true">Edit</el-button>
-                
+                <el-button class="result-btn normal-btn" :disabled="!resultImgUrl || !resultMaskUrl || runState!='success'" @click="showEdit">Edit</el-button>
+                <el-dialog 
+                    append-to-body
+                    width="1200px"
+                    top="5vh"
+                    title="Edit Mask"
+                    v-model="dialogEditVisible"
+                    destroy-on-close
+                    :close-on-click-modal=false
+                    :close-on-press-escape=false
+                >
+                    <SegmentEdit :jsonData=resultJsonFile 
+                        :imageUrl=resultImgUrl 
+                        :fullMaskUrl=resultMaskUrl 
+                        :opacity=maskOpacity
+                        @edit-result="handleEditResult"
+                    >
+                    </SegmentEdit>
+                </el-dialog>
+
             </div>
             
         </div>
@@ -166,18 +184,24 @@ import VueSlider from 'vue-slider-component'
 import 'vue-slider-component/theme/default.css'
 import axios from 'axios'
 import JSZip from "jszip"
+import {loadImage} from '@/helper/loadImage'
 
 // axios api setting
 axios.defaults.baseURL =
   process.env.NODE_ENV === "development" ? "" : "https://coralscop-test.hkustvgd.com";
 const base = process.env.NODE_ENV === "development" ? "/api" : "";
 
+const dialogEditVisible = ref(false);
+const showEdit = () => {
+    dialogEditVisible.value = true;
+}
+
 // upload file
 const imgInput = ref<HTMLInputElement>()
 const imageUrl = ref('')
 const upload = ref(true)
-var uploadFileName = ref('');
-// var uploadFileName = ref('8c78a50c-0cd1-4982-90da-d4d2a6800f27.jpg');
+// var uploadFileName = ref('');
+var uploadFileName = ref('9527f17a-15ec-4f79-976d-583cba1ac42d.png');
 
 const isEditParam = ref(false);
 const runState = ref('ready');
@@ -253,8 +277,6 @@ const stopRunTime = () => {
     runTimer = clearInterval(runTimer);
 }
 
-
-
 const triggerUpload = () => {
     // console.log(imgInput);
     if (imgInput.value) {
@@ -285,11 +307,7 @@ const handleRemove = () => {
 }
 
 const showModelParams = () => {
-    if (isEditParam.value == true) {
-        isEditParam.value = false;
-    } else {
-        isEditParam.value = true;
-    }
+    isEditParam.value = !isEditParam.value;
 }
 const inputError = (type:string, msg:string) => {
     console.log(type, msg);
@@ -422,11 +440,11 @@ const runModel = async () =>  {
         }
     }
 }
-const modifyMaskColor = (imgSrc: string) => {
+const modifyMaskColor = (imgSrc: string, color: number[]) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
-    const purple = [154, 30, 232];
+    // const purple = [154, 30, 232];
     img.src = imgSrc;
     img.onload = ()  => {
         canvas.height = img.height;
@@ -434,13 +452,14 @@ const modifyMaskColor = (imgSrc: string) => {
         img.onload = null;
         if (ctx) {
             ctx.drawImage(img, 0, 0);
+            maskUrl = canvas.toDataURL();
             const imageData = ctx.getImageData(0,0,img.width,img.height);
             const data = imageData.data;
             for (let idx = 0; idx < data.length; idx += 4) {
                 if (data[idx] > 250) {
-                    data[idx] = purple[0];
-                    data[idx+1] = purple[1];
-                    data[idx+2] = purple[2];
+                    data[idx] = color[0];
+                    data[idx+1] = color[1];
+                    data[idx+2] = color[2];
                     data[idx+3] = 255;
                 } else {
                     data[idx] = 0;
@@ -469,11 +488,12 @@ const getResultInfo = async (imgName:string, maskPath:string, jsonFilePath:strin
         });
         const maskBlob = new Blob([resultMask.value.data], {type:resultMask.value.headers['content-type']});
         maskUrl = URL.createObjectURL(maskBlob);
-        modifyMaskColor(maskUrl);
+        modifyMaskColor(maskUrl,[154, 30, 232]);
         // console.log(maskBlob);
 
         var json = await axios.get(base+jsonFilePath);
         resultJsonFile.value = JSON.stringify(json);
+        // console.log(resultJsonFile.value);
         resultJsonUrl.value = 'data:application/json;charset=utf-8,'+encodeURIComponent(resultJsonFile.value);       
     } catch (err) {
         console.error(err);
@@ -515,26 +535,26 @@ const pollingInquiry = () => {
     });
 }
 
+
+
 const generateResultImg = async (imgSrc:string, maskSrc:string, maskOpa:number, blendMode:GlobalCompositeOperation) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext("2d");
-    const img = new Image();
-    img.src = imgSrc;
-    const mask = new Image();
-    mask.src = maskSrc;
+    if (!ctx) {
+        throw new Error('Canvas context is not supported. ');
+    }
 
-    await img.onload;
-    await mask.onload;
+    const img = await loadImage(imgSrc);
     canvas.height = img.height;
     canvas.width = img.width;
-    if (ctx) {
-        ctx.drawImage(img, 0, 0);
-        ctx.globalAlpha = maskOpa;
-        ctx.globalCompositeOperation = blendMode;
-        ctx.drawImage(mask, 0, 0);
-    }
-    return canvas.toDataURL();
+    ctx.drawImage(img, 0, 0);
 
+    const mask = await loadImage(maskSrc);
+    ctx.globalAlpha = maskOpa;
+    ctx.globalCompositeOperation = blendMode;
+    ctx.drawImage(mask, 0, 0);
+    
+    return canvas.toDataURL();
 }
 
 const handleClear = () => {
@@ -592,8 +612,8 @@ const downloadAll = async() => {
     var mergeUrl = await generateResultImg(resultImgUrl.value, resultMaskUrl.value, maskOpacity.value, 'multiply');
     // console.log(mergeUrl);
     zip.file('coralscop-result.png', mergeUrl.split(';base64,')[1], {base64:true});
-    zip.file('coralscop-mask.png', resultMask.value.data, {binary:true});
-    zip.file('coralscop-json.json', resultJsonUrl.value, {binary:true});
+    zip.file('coralscop-mask.png', maskUrl.split(';base64,')[1], {base64:true});
+    zip.file('coralscop-json.json', resultJsonFile.value, {binary:true});
     zip.generateAsync({ type: 'blob' }).then(content => {
         // console.log(content);
         downloadFile(URL.createObjectURL(content), 'coralscop-result.zip');
@@ -602,21 +622,53 @@ const downloadAll = async() => {
 }
 
 
+const converBinaryMask = async (imgSrc: string) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+        throw new Error('Canvas context is not supported. ');
+    }
+
+    const img = await loadImage(imgSrc);
+    canvas.height = img.height;
+    canvas.width = img.width;
+    ctx.drawImage(img, 0, 0);
+
+    const imageData = ctx.getImageData(0,0,img.width,img.height);
+    const data = imageData.data;
+    for (let idx = 0; idx < data.length; idx += 4) {
+        if (data[idx] > 0) {
+            data[idx] = 255;
+            data[idx+1] = 255;
+            data[idx+2] = 255;
+            data[idx+3] = 255;
+        } else {
+            data[idx] = 0;
+            data[idx+1] = 0;
+            data[idx+2] = 0;
+            data[idx+3] = 255;
+        }
+    }
+    ctx.putImageData(imageData,0,0);
+    return canvas.toDataURL();
+}
+
+const handleEditResult = async (result) => {
+    // console.log(result);
+    // console.log(resultJsonFile.value);
+    resultJsonFile.value = JSON.stringify(result.editJson);
+    // console.log(resultJsonFile.value);
+    resultJsonUrl.value = 'data:application/json;charset=utf-8,'+encodeURIComponent(resultJsonFile.value);       
+    resultMaskUrl.value = result.editMask;
+    maskUrl = await converBinaryMask(result.editMask);
+    
+    // console.log(maskurl);
+}
+
 </script>
 
 <style>
-html,
-body {
-    padding: 0;
-    margin: 0;
-    height: auto;
-    width: 100vw;
-    display: block;
-    background-color: #FAFAFA;
-    font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
-    text-align: center;
-    justify-content: center;
-}
 
 .model-container {
     display: flex;

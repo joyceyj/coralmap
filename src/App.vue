@@ -4,7 +4,7 @@
     </div>
     
     <div class="main-content">
-        <RouterView></RouterView>
+        <RouterView ></RouterView>
     </div>
 
     <div class="foot">
@@ -19,18 +19,6 @@
 </script>
 
 <style scoped>
-/* 手动配置全局样式 */
-html,
-body {
-    padding: 0;
-    margin: 0;
-    height: auto;
-    width: 100vw;
-    display: block;
-    background-color: #FAFAFA;
-    font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
-    -webkit-text-size-adjust: 100%;
-}
 
 .main-content {
     width: 100vw;
@@ -39,7 +27,6 @@ body {
     background-color: #FAFAFA;
     display: flex;
     justify-content: center;
-
 }
 .side-menu {
     position: fixed;

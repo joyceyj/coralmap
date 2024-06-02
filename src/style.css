@@ -26,6 +26,8 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
+  /* overflow-x: hidden; */
+  /* padding-left: calc(100vw - 100%); */
   min-width: 320px;
   min-height: 100vh;
   font-family: SourceHanSansCN-Regular, SourceHanSansCN-Medium, SourceHanSansCN-Bold;

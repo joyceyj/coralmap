@@ -4,7 +4,7 @@
         <p>Coral<br>SCOP</p>
     </div>
 
-    <el-container>
+    <div class="homepage-container">
         <div class="homepage-cover" :style="{'background-image': 'url('+mainBgUrl+')'}">
             <div class="homepage-intro">
                 <div class="intro-text">
@@ -19,8 +19,8 @@
                 <button class='model-btn basic-btn' @click="routeToTryModel">Try for Free</button>
             </div>
         </div>
-        <!-- <el-image  style="width:100%;height:100vh;" :src="mainBgUrl" ></el-image> -->
-        <!-- <div class="homepage-intro">
+        <!-- <el-image  style="width:90vw;height:100vh;" :src="mainBgUrl" ></el-image>
+        <div class="homepage-intro">
             <div class="intro-text">
                 <p>CoralSCOP</p>
             </div>
@@ -55,7 +55,7 @@
         </div>
         
 
-    </el-container>
+    </div>
 </template>
 
 <script lang="ts" setup>
@@ -78,13 +78,12 @@ const routeToTryModel = () => {
 
 <style scoped>
 /* 手动配置全局样式 */
-html,
-body,
-.el-container {
+
+.homepage-container {
   padding: 0;
   margin: 0;
   height: auto;
-  width: 100%;
+  width: 100vw;
   display: block;
   background-color: #FAFAFA;
 }

@@ -11,8 +11,23 @@
                 <li class="menu-items" v-for="(item, index) in navList" :key="index">
                     <RouterLink :to="item.path" class="menu-item" active-class="active-menu-item" @click="handleRoute">{{ item.title }}</RouterLink>
                 </li>
+                <li class="menu-items" v-if="userLogin">
+                    <el-tooltip content="Next version" placement="top" effect="light">
+                        <span class="menu-item">User</span>
+                    </el-tooltip>
+                </li>
+
+                <li class="menu-items" @click="handleShowLogin" v-if="!userLogin">
+                    <span class="menu-item">Log In</span>
+                    <Login ref=logInVisible @openSignup="handleTurnSignup"></Login>
+                </li>
+                <li class="menu-items" @click="handleShowSignup" v-if="!userLogin">
+                    <span class="menu-item">Sign Up</span>
+                    <Signup ref=signUpVisible></Signup>
+                </li>
             </ul>
         </nav>
+        
         <div class="nav-bottom">
             <ul class="list-style-none r1">
                 <li class="nav-item">
@@ -28,9 +43,12 @@
 </template>
 
 <script lang="ts" setup>
+import {userInfoStore} from '@/store/user'
+
 const showMenu = ref(false);
 const menuInput = ref();
-
+const logInVisible = ref();
+const signUpVisible = ref();
 const navList = [{
     title: 'Home',
     path: '/'
@@ -38,6 +56,8 @@ const navList = [{
     title: 'Our Model',
     path: '/newImage'
 }];
+const userLogin = ref(false);
+const userStore = userInfoStore();
 
 const handleShowMenu = () => {
     showMenu.value = !showMenu.value;
@@ -46,6 +66,27 @@ const handleShowMenu = () => {
 const handleRoute = () => {
     menuInput.value.click();
 }
+
+const handleShowLogin = () => {
+    logInVisible.value.open();
+}
+
+const handleShowSignup = () => {
+    signUpVisible.value.open();
+}
+
+const handleTurnSignup = () => {
+    handleShowSignup();
+}
+
+const checkUserState = () => {
+    userLogin.value = userStore.isLogin;
+}
+
+onMounted(() => {
+    checkUserState();
+})
+
 </script>
 
 <style>
@@ -80,6 +121,7 @@ const handleRoute = () => {
 }
 .menu-items {
     padding: 15px;
+    cursor: pointer;
 }
 .menu-item {
     font-size: 26px;
@@ -187,4 +229,4 @@ const handleRoute = () => {
     }
 }
 </style>
-  
+  @/store/user

@@ -9,11 +9,12 @@ declare module 'vue' {
   export interface GlobalComponents {
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCol: typeof import('element-plus/es')['ElCol']
-    ElContainer: typeof import('element-plus/es')['ElContainer']
+    ElDialog: typeof import('element-plus/es')['ElDialog']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElImage: typeof import('element-plus/es')['ElImage']
     ElRow: typeof import('element-plus/es')['ElRow']
     ElStatistic: typeof import('element-plus/es')['ElStatistic']
+    ElTooltip: typeof import('element-plus/es')['ElTooltip']
     Homepage: typeof import('./../components/Homepage.vue')['default']
     ImageContrast: typeof import('./../components/ImageContrast.vue')['default']
     Login: typeof import('./../components/Login.vue')['default']
@@ -22,5 +23,7 @@ declare module 'vue' {
     NewImage: typeof import('./../components/NewImage.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SegmentEdit: typeof import('./../components/SegmentEdit.vue')['default']
+    Signup: typeof import('./../components/Signup.vue')['default']
   }
 }
