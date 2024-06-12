@@ -16,17 +16,55 @@ import { reshape } from 'mathjs'
 //     return cnts;
 // }      
 
-function decode(rleArr) {
-    var v = 0; 
-    var decodedBinMask:number[] = [];
-    var idx = 0;
-    for(var j=0; j<rleArr.length; j++ ) {
-        for(var k=0; k<rleArr[j]; k++ ) {
-        decodedBinMask[idx++] = v;         
-        }   
-        v = 1 - v;       
-    }  
-    return decodedBinMask;
+// function decode(rleArr) {
+//     var decodedBinMask:number[] = [];
+//     var v = 0; 
+//     var idx = 0;
+//     for(var j=0; j < rleArr.length; j++ ) {
+//         for(var k=0; k < rleArr[j]; k++ ) {
+//             decodedBinMask[idx++] = v;         
+//         }   
+//         v = 1 - v;   
+//     }  
+//     return decodedBinMask;
+// }
+function decode([rows, cols], counts, flat=true) {
+    let pixelPosition = 0,
+      binaryMask
+  
+    if (flat) {
+        binaryMask = Array(rows * cols).fill(0)
+    } else {
+        binaryMask = Array.from({length: rows}, (_) => Array(cols).fill(0))
+    }
+
+    for (let i = 0, rleLength = counts.length; i < rleLength; i += 2) {
+        let zeros = counts[i],
+            ones = counts[i + 1] ?? 0
+
+        pixelPosition += zeros 
+
+        while (ones > 0) {
+        const rowIndex = pixelPosition % rows,
+                colIndex = (pixelPosition - rowIndex) / rows
+
+        if (flat) {
+            const arrayIndex = rowIndex * cols + colIndex
+            binaryMask[arrayIndex] = 1
+        } else {
+            binaryMask[rowIndex][colIndex] = 1
+        }
+
+            pixelPosition++
+            ones--
+        }
+    }
+    if (!flat) {
+        console.log("Result matrix:")
+        binaryMask.forEach((row, i) => console.log(row.join(" "), `- row ${i}`))
+    }
+    
+    return binaryMask
 }
 // function rleToString(rleArr) {
 //     var s:number[] = [];
@@ -75,5 +113,5 @@ function decode(rleArr) {
 // }
 
 export function rleArrToBinaryMask(input: any, size: number[]) {
-    return reshape(decode(input), size);
+    return reshape(decode([size[0], size[1]], input), size);
 }

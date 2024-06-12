@@ -238,7 +238,7 @@ const initEdit = async () => {
     // var mask_tmp = rleArrToBinaryMask(json.data.annotations[0]['uncompressed_segmentation']['counts'],json.data.annotations[0]['uncompressed_segmentation']['size']);
     // console.log(mask_tmp);
     maskList = json.data.annotations.map(item => rleArrToBinaryMask(item['uncompressed_segmentation']['counts'],item['uncompressed_segmentation']['size']));
-    // console.log(maskList);
+    // console.log(maskList[0]);
 }
 
 const drawAllBbox = () => {
@@ -287,6 +287,29 @@ const drawSelectBbox = (bbox: number[], color: string) => {
         ctx.strokeStyle = color;
         ctx.lineWidth = 1;
         ctx.strokeRect(bbox[0],bbox[1],bbox[2],bbox[3]);
+        ctx.stroke();
+    }
+}
+
+const drawAllMask = () => {
+    const canvas = <HTMLCanvasElement>document.getElementById('segment-canvas');
+    canvas.width = resize.w;
+    canvas.height = resize.h;
+    const ctx = canvas?.getContext('2d',{ willReadFrequently: true });
+    if (ctx) {
+        // ctx.clearRect(0, 0, resize.w, resize.h);
+        ctx.lineWidth = 1;
+        maskList.forEach(mask => {
+            // console.log(labelTag.value[bbox[11]]);
+            for (let y = 0; y < mask.length; y++) {
+                for (let x = 0; x < mask[y].length; x++) {
+                    if (mask[y][x]) {
+                        ctx.fillStyle = '#FFE666';
+                        ctx.fillRect(Math.round(x*resize.scale), Math.round(y*resize.scale), 1, 1);
+                    }
+                }
+            }
+        });
         ctx.stroke();
     }
 }
@@ -372,9 +395,15 @@ const handleMouseDown = (event: MouseEvent) => {
                 drawSelectBbox(scaleBbox, labelTag.value[bbox[11]]);
                 clearFlag = false;
                 drawLabelBbox();
+                console.log(bbox);
             }
         });
-        
+        maskList.forEach(mask => {
+            var x = Math.round(mouseX / resize.scale);
+            var y = Math.round(mouseY / resize.scale);
+            console.log(isPointInPolygon(x, y, mask));
+        })
+        // drawAllMask();
         if (clearFlag) {
             clearCanvas();
             selectedLabel.value = '';
