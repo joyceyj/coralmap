@@ -220,7 +220,7 @@ const resultMask = ref();
 var resultJsonFile = ref();
 
 const showMask = ref(true);
-const maskOpacity = ref(0.3);
+const maskOpacity = ref(0.6);
 var variableOpacity = {
     'opacity': maskOpacity.value,
 }
@@ -373,7 +373,7 @@ const clearResult = () => {
     resultJsonFile.value = '';
 
     showMask.value = true;
-    maskOpacity.value = 0.3;
+    maskOpacity.value = 0.6;
     variableOpacity['opacity'] = maskOpacity.value;
 }
 
@@ -492,7 +492,16 @@ const getResultInfo = async (imgName:string, maskPath:string, jsonFilePath:strin
         // console.log(maskBlob);
 
         var json = await axios.get(base+jsonFilePath);
-        resultJsonFile.value = JSON.stringify(json);
+        var jsonstring = JSON.stringify(json);
+        var jsondata = JSON.parse(jsonstring);
+        var anno = jsondata.data.annotations.map(item => {
+            var newItem = item;
+            newItem['label'] = 'coral';
+            // console.log(label);
+            return newItem;
+        });
+        jsondata.data.annotations = anno;
+        resultJsonFile.value = JSON.stringify(jsondata);
         // console.log(resultJsonFile.value);
         resultJsonUrl.value = 'data:application/json;charset=utf-8,'+encodeURIComponent(resultJsonFile.value);       
     } catch (err) {
@@ -578,7 +587,7 @@ const handleClear = () => {
     resultJsonFile.value = '';
 
     showMask.value = true;
-    maskOpacity.value = 0.3;
+    maskOpacity.value = 0.6;
 }
 
 const downloadFile = (src:string, filename:string) => {
@@ -660,8 +669,10 @@ const handleEditResult = async (result) => {
     resultJsonFile.value = JSON.stringify(result.editJson);
     // console.log(resultJsonFile.value);
     resultJsonUrl.value = 'data:application/json;charset=utf-8,'+encodeURIComponent(resultJsonFile.value);       
-    resultMaskUrl.value = result.editMask;
-    maskUrl = await converBinaryMask(result.editMask);
+    if (result.editType == 'rmv') {
+        resultMaskUrl.value = result.editMask;
+        maskUrl = await converBinaryMask(result.editMask);
+    }
     
     // console.log(maskurl);
 }

@@ -128,10 +128,7 @@ const initMap = async () => {
         zoomControl: true,
         // attributionControl: false
     });
-    // http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png
-    // L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
     L.tileLayer("http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png").addTo(map);
-    // L.tileLayer("https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}").addTo(map);
 
     await getSummaryData();
     const s = new Set();
